@@ -18,7 +18,7 @@ test_dummy = ''
 #########################################
 
 class Creature:
-    def __init__(self, name, level, XP, maxHP, gold, moves):
+    def __init__(self, name, level, XP, maxHP, gold, moves, intro):
         self.name = name
         self.level = level
         self.XP = XP
@@ -26,6 +26,7 @@ class Creature:
         self.health = maxHP
         self.gold = gold
         self.moves = moves
+        self.intro = intro
         enemies.append(self)
     
     def __str__(self):
@@ -63,8 +64,42 @@ def player_move(target): #gets a move input from the player, checks if that move
         else:
             print(f"Response \'{response}\' not recognized or unlearnt. Try \'options\' for a list of valid options.")
 
+def heal(target): #heals the target back to full health
+    target.health = target.maxHP
+    #print(f"{target.name} has been fully healed to {target.health} HP!")
+
 def dummy_init(dummy):
     return globals()[dummy]
+
+def fight(target): #starts a battle between the player and an enemy
+    global battling
+    battling = True
+    print(f"You begin battle with the enemy {target.name}!")
+    while True:
+        player_move(target)
+        print(f"The enemy {target.name} has {target.health}/{target.maxHP} HP remaining!")
+        if hpcheck(target) == True:
+            break
+        target.creature_attack(player)
+        if hpcheck(target) == True:
+            break
+    battling = False
+    heal(target)
+
+def hpcheck(target, checkup=False): #checks the hp of both the player and the target enemy, if one of their HP is at 0 then it ends the battle by returning True. Awards the target enemies xp and gold to the player if the player defeats them in combat.
+    if player.health <= 0:
+        if battling == True:
+            print(f"You've been defeated in battle by the enemy {target.name}!")
+            return True
+        print(f"You're too weak to carry on...")
+    elif target.health <= 0:
+        print(f"You defeated the enemy {target.name} in battle!")
+        player.gold += target.gold
+        player.XP += target.XP
+        print(f"You gained {target.gold} gold and {target.XP} XP!")
+        return True
+    if checkup == True:
+        print(f"HP of {target.name}: {target.health}/{target.maxHP}")
         
 #########################################
 #            CREATURE MOVES             #
@@ -158,9 +193,9 @@ class m_Flee:
 #               CREATURES               #
 #########################################
 
-goblin = Creature("Goblin", 1, 10, 50, 35, [[Stab(), 70], [Claw(), 30], [Bite(), 50]])
-dog = Creature("Dog", 3, 25, 200, 0, [[Claw(), 150], [Bite(), 80]])
-player = Creature("Player", 1, 0, 100, 0, {})
+goblin = Creature("Goblin", 1, 10, 50, 35, [[Stab(), 70], [Claw(), 30], [Bite(), 50]], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
+wolf = Creature("Wolf", 3, 25, 200, 0, [[Claw(), 150], [Bite(), 80]], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
+player = Creature("Player", 1, 0, 100, 0, {}, "You encountered... yourself?")
 
 #########################################
 #            INITIALIZATION             #

@@ -162,6 +162,10 @@ goblin = Creature("Goblin", 1, 10, 50, 35, [[Stab(), 70], [Claw(), 30], [Bite(),
 dog = Creature("Dog", 3, 25, 200, 0, [[Claw(), 150], [Bite(), 80]])
 player = Creature("Player", 1, 0, 100, 0, {})
 
+#########################################
+#            INITIALIZATION             #
+#########################################
+
 temp_globals = globals().copy() #initializes all the player moves, which add themselves to a list of possible player moves
 for globals_object in temp_globals:
     if globals_object[:2] == "m_":

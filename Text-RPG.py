@@ -15,7 +15,9 @@ import areas as a
 
 player = c.player
 moves_list = c.moves_list
+activities_list = a.activities_list
 dummy = c.goblin
+p.current_area = a.chalgos
 test_iteration = 1 #used for the run_test function, that keeps track of how many tests have been run during this instance of the program.
 running = True #while true, the main gameplay loop will continue running. Ends with either the end_game() function or if the player dies.
 
@@ -115,6 +117,10 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
     if checkup == True:
         print(f"HP of {target.name}: {target.health}/{target.maxHP}")
 
+def arrive(area):
+    p.current_area = area
+    print(f"You have arrived at {p.current_area.name}.")
+
 #########################################
 #          FRONT-END FUNCTIONS          #
 #########################################
@@ -148,15 +154,23 @@ def f_commands(): #prints a list of all the front-end functions to the player, w
         if globals_object[:2] == "f_":
             commands_list.append(globals_object[2:])
     print(f"""List of valid commands:\n{", ".join(commands_list[1:])}""")
+    print(f"List of available activities:")
+    for activity in activities_list:
+        if activity in p.current_area.activities:
+            print(activities_list[activity])
 
 #########################################
 #             GAMEPLAY LOOP             #
 #########################################
+#arrive(a.galvynn_forest)
 
 while running == True:
     response = "f_" + input("What would you like to do? ")
     try:
-        globals()[response.lower()]()
+        if response[2].upper()+response[3:].lower() in p.current_area.activities:
+            activities_list[response[2].upper()+response[3:].lower()](p.current_area)
+        else:
+            globals()[response.lower()]()
     except:
         print(f"Response \'{response[2:]}\' not recognized. Try \'commands\' for a list of valid options.")
         

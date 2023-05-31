@@ -12,6 +12,7 @@ import playerstats as p
 enemies = [] #a list of all enemies that gets filled every time a new creature is initialized. No purpose for it currently.
 moves_list = {} #a dictionary of all player moves in the game that gets filled with they're initialized. The key is the string name of the move, and the value is the move class object itself, making it easy to call a desired move using the string input from the player.
 test_dummy = ''
+battling = False
 
 #########################################
 #               CLASSES                 #
@@ -77,11 +78,11 @@ def fight(target): #starts a battle between the player and an enemy
     print(f"You begin battle with the enemy {target.name}!")
     while True:
         player_move(target)
-        print(f"The enemy {target.name} has {target.health}/{target.maxHP} HP remaining!")
-        if hpcheck(target) == True:
+        if hpcheck(target) == True or battling == False:
             break
+        print(f"The enemy {target.name} has {target.health}/{target.maxHP} HP remaining!")
         target.creature_attack(player)
-        if hpcheck(target) == True:
+        if hpcheck(target) == True or battling == False:
             break
     battling = False
     heal(target)
@@ -150,7 +151,6 @@ class m_Execute:
     def __init__(self):
         self.name = "Execute"
         self.damage = 99999999999
-        global moves_list
         moves_list[self.name] = self
         
     def __str__(self):
@@ -160,20 +160,42 @@ class m_Execute:
         global moves_list
         basic_attack(self, player, target, f"You deleted the {target.name}")
         
-class m_Punch:
+class m_Lunch:
     def __init__(self):
-        self.name = "Punch"
-        self.damage = 5
-        global moves_list
+        self.name = "Lunch"
+        self.damage = 50
         moves_list[self.name] = self
-        player.moves[self.name] = moves_list[self.name]
         
     def __str__(self):
-        return f"{self.name}: A swift punch that deals {self.damage} damage."
+        return f"{self.name}: A swift lunch that deals {self.damage} damage."
         
     def __call__(self, target):
         global moves_list
-        basic_attack(self, player, target, f"You punched the {target.name} in the face")
+        basic_attack(self, player, target, f"You lunched the {target.name} in the face")
+        
+class Attack:
+    def __init__(self, learned, name, description, damage, accuracy, verb, special):
+        self.learned = learned
+        self.name = name
+        self.description = description
+        self.damage = damage
+        self.accuracy = accuracy
+        self.verb = verb
+        self.special = special
+        global moves_list
+        moves_list[self.name] = self
+        if self.learned == True:
+            player.moves[self.name] = moves_list[self.name]
+        
+    def __str__(self):
+        return f"{self.name}: {self.description} that deals {self.damage} damage."
+        
+    def __call__(self, target):
+        global moves_list
+        if len(self.special) <= 0:
+            basic_attack(self, player, target, f"{self.verb} {target.name}")
+        else:
+            moves_list["m_"+self.special](target)
         
 class m_Flee:
     def __init__(self):
@@ -186,7 +208,8 @@ class m_Flee:
         return f"{self.name}: You attempt to flee combat."
         
     def __call__(self, target):
-        global moves_list
+        global battling
+        battling = False
         print(f"You fled from the enemy {target.name}!")
 
 #########################################
@@ -196,6 +219,16 @@ class m_Flee:
 goblin = Creature("Goblin", 1, 10, 50, 35, [[Stab(), 70], [Claw(), 30], [Bite(), 50]], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
 wolf = Creature("Wolf", 3, 25, 200, 0, [[Claw(), 150], [Bite(), 80]], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
 player = Creature("Player", 1, 0, 100, 0, {}, "You encountered... yourself?")
+
+#########################################
+#               ATTACKS                 #
+#########################################
+
+slash = Attack(True, "Slash", "A swift slash with your weapon", 20, 100, "You slashed the", "")
+stab = Attack(False, "Stab", "A harsh jab with your weapon", 30, 80, "You stabbed the", "")
+punch = Attack(True, "Punch", "A quick punch with your first", 10, 100, "You punched the", "")
+lunch = Attack(False, "Lunch", "Eat this", 50, 50, "You fed the", "Lunch")
+execute = Attack(False, "Execute", "Execute this", -1, 100, "You executed the", "Execute")
 
 #########################################
 #            INITIALIZATION             #

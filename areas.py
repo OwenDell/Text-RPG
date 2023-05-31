@@ -60,8 +60,8 @@ class a_Explore:
 #                 AREAS                 #
 #########################################
 
-chalgos = Area("Chalgos", "A small, peaceful town in the middle of the Galvynn Forest", "Settlement", 1, 0, k_start, [], [], [], [])
-galvynn_forest = Area("Galvynn Forest", "A dark, dense forest... venturing far from the trail is dangerous here...", "Field", 1, 100, k_start, ["Explore"], [[e.Enemy(), 50], [e.GoldPouch(), 20], [e.FindItem(), 15]], [[c.goblin, 50], [c.wolf, 20]], [[c.wolf, 20]])
+chalgos = Area("Chalgos", "A small, peaceful town in the middle of the Gavlynn Forest", "Settlement", 1, 0, k_start, [], [], [], [])
+gavlynn_forest = Area("Gavlynn Forest", "A dark, dense forest... venturing far from the trail is dangerous here...", "Field", 1, 100, k_start, ["Explore"], [[e.Enemy(), 50], [e.GoldPouch(), 20], [e.FindItem(), 15]], [[c.goblin, 50], [c.wolf, 20]], [[c.wolf, 20]])
 
 #########################################
 #            INITIALIZATION             #

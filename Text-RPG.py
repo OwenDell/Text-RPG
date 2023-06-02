@@ -17,6 +17,7 @@ import encounters as e
 player = c.player
 moves_list = c.moves_list
 activities_list = a.activities_list
+heal = c.heal
 dummy = c.goblin
 p.current_area = a.chalgos
 test_iteration = 1 #used for the run_test function, that keeps track of how many tests have been run during this instance of the program.

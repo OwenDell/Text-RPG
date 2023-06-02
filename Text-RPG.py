@@ -124,10 +124,13 @@ def f_commands(): #prints a list of all the front-end functions to the player, w
         if globals_object[:2] == "f_":
             commands_list.append(globals_object[2:])
     print(f"""List of valid commands:\n{", ".join(commands_list[1:])}""")
-    print(f"List of available activities:")
+    print(f"List of available activities in {p.current_area.name}:")
     for activity in activities_list:
         if activity in p.current_area.activities:
             print(activities_list[activity])
+            
+def f_inventory():
+    p.inventory_check()
 
 #########################################
 #             GAMEPLAY LOOP             #

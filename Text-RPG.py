@@ -18,7 +18,8 @@ player = c.player
 moves_list = c.moves_list
 activities_list = a.activities_list
 heal = c.heal
-dummy = c.goblin
+dummy = c.wwe_champ
+fight = c.fight
 p.current_area = a.chalgos
 test_iteration = 1 #used for the run_test function, that keeps track of how many tests have been run during this instance of the program.
 running = True #while true, the main gameplay loop will continue running. Ends with either the end_game() function or if the player dies.
@@ -111,8 +112,9 @@ def f_devcmds(): #hidden command that the player can run that allows them to run
                 pass
             params_response = converter(*params_response)
             command(*params_response)
-        except:
+        except Exception as e:
             print("An error has occurred [1].")
+            print(e)
     except:
         print("Unrecognized command.")
         

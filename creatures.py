@@ -2,6 +2,7 @@
 #               IMPORTS                 #
 #########################################
 
+import random
 import functions as f
 import playerstats as p
 
@@ -20,13 +21,14 @@ battling = False
 #########################################
 
 class Creature:
-    def __init__(self, name, level, XP, maxHP, gold, moves, intro):
+    def __init__(self, name, level, XP, maxHP, gold, evasion, moves, intro):
         self.name = name
         self.level = level
         self.XP = XP
         self.maxHP = maxHP
         self.health = maxHP
         self.gold = gold
+        self.evasion = evasion
         self.moves = moves
         self.intro = intro
         enemies.append(self)
@@ -35,149 +37,17 @@ class Creature:
         return f"Lvl: {self.level} {self.name}, with {self.health} HP!"
         
     def creature_attack(self, target): #randomly chooses an attack from the creatures attack pool. Takes into account the chance of the move to be chosen out of the total pool.
-        f.weighted_random(self.moves)(self, target)
-        
-#########################################
-#          BACK-END FUNCTIONS           #
-#########################################
-        
-def basic_attack(move, user, target, message=f"attacked you"): #used for both creature and player attacks that don't have any special functions to them, and simply do damage.
+        moves_list[f.weighted_random(self.moves)](self, target)
+
+#########################################  These are stored here as other classes rely on them to be defined prior to their definition
+player = Creature("Player", 1, 0, 100, 0, 0, {}, "You encountered... yourself?")
+
+def basic_attack(move, user, target, message=f"the attacker attacked"): #used for both creature and player attacks that don't have any special functions to them, and simply do damage.
     target.health -= move.damage
-    if user is player:
-        print(f"{message}, dealing {move.damage} damage!")
-    elif target is player:
-        print(f"The {user.name} {message}, dealing {move.damage} damage!")
-    else:
-        print(f"The {user.name} attacked the {target.name}, dealing {move.damage} damage!")
-        
-def player_move(target): #gets a move input from the player, checks if that move exists in the players list of known moves, and performs it if so.
-    while True:
-        response = input(f"You have {player.health}/{player.maxHP} HP and {p.mana}/{p.maxMana} Mana, what do you do? ")
-        response = response[0].upper()+response[1:].lower()
-        if response == "Options":
-            moves_list[response](target)
-        elif response in player.moves:
-            try:
-                if moves_list[response].mana <= p.mana:
-                    p.mana -= moves_list[response].mana
-                    moves_list[response](target)
-                    break
-                else:
-                    print(f"You don't have enough Mana to use that move! it requires {moves_list[response].mana} Mana!")
-            except Exception as e:
-                moves_list[response](target)
-                break
-        else:
-            print(f"Response \'{response}\' not recognized or unlearnt. Try \'options\' for a list of valid options.")
+    print(f"{message}, dealing {move.damage} damage!")
 
-def heal(target): #heals the target back to full health
-    target.health = target.maxHP
-    #print(f"{target.name} has been fully healed to {target.health} HP!")
-
-def dummy_init(dummy):
-    return globals()[dummy]
-
-def fight(target): #starts a battle between the player and an enemy
-    global battling
-    battling = True
-    print(f"You begin battle with the enemy {target.name}!")
-    while True:
-        player_move(target)
-        if hpcheck(target) == True or battling == False:
-            break
-        print(f"The enemy {target.name} has {target.health}/{target.maxHP} HP remaining!")
-        target.creature_attack(player)
-        if hpcheck(target) == True or battling == False:
-            break
-    battling = False
-    heal(target)
-
-def hpcheck(target, checkup=False): #checks the hp of both the player and the target enemy, if one of their HP is at 0 then it ends the battle by returning True. Awards the target enemies xp and gold to the player if the player defeats them in combat.
-    if player.health <= 0:
-        if battling == True:
-            print(f"You've been defeated in battle by the enemy {target.name}!")
-            return True
-        print(f"You're too weak to carry on...")
-    elif target.health <= 0:
-        print(f"You defeated the enemy {target.name} in battle!")
-        player.gold += target.gold
-        player.XP += target.XP
-        print(f"You gained {target.gold} gold and {target.XP} XP!")
-        return True
-    if checkup == True:
-        print(f"HP of {target.name}: {target.health}/{target.maxHP}")
-        
-#########################################
-#            CREATURE MOVES             #
 #########################################
 
-class Claw:
-    def __init__(self):
-        self.damage = 10
-        
-    def __call__(self, user, target):
-        basic_attack(self, user, target, f"gouged you with their claws")
-        
-class Bite:
-    def __init__(self):
-        self.damage = 20
-        
-    def __call__(self, user, target):
-        basic_attack(self, user, target, f"bit your arm")
-        
-class Stab:
-    def __init__(self):
-        self.damage = 30
-        
-    def __call__(self, user, target):
-        basic_attack(self, user, target, f"stabbed you in the torso")
-        
-#########################################
-#             PLAYER MOVES              #
-#########################################
-
-class m_Options:
-    def __init__(self):
-        self.name = "Options"
-        global moves_list
-        moves_list[self.name] = self
-        player.moves[self.name] = moves_list[self.name]
-        
-    def __str__(self):
-        return f"{self.name}: Returns a list of all available actions you can take during combat."
-        
-    def __call__(self, target):
-        global moves_list
-        print("List of valid options:")
-        for i in player.moves:
-            print(player.moves[i])
-
-class s_Execute:
-    def __init__(self):
-        self.name = "Execute"
-        self.damage = 99999999999
-        specials_list[self.name] = self
-        
-    def __str__(self):
-        return f"{self.name}: Deletes the enemy from existence."
-        
-    def __call__(self, target):
-        global moves_list
-        basic_attack(self, player, target, f"You deleted the {target.name}")
-        
-class s_Lunch:
-    def __init__(self):
-        self.name = "Lunch"
-        self.damage = 50
-        specials_list[self.name] = self
-        
-    def __str__(self):
-        return f"{self.name}: A swift lunch that deals {self.damage} damage."
-        
-    def __call__(self, target):
-        global moves_list
-        basic_attack(self, player, target, f"You lunched the {target.name} in the face")
-        
 class Attack:
     def __init__(self, learned, name, description, damage, accuracy, mana, verb, special):
         self.learned = learned
@@ -194,14 +64,84 @@ class Attack:
             player.moves[self.name] = moves_list[self.name]
         
     def __str__(self):
-        return f"{self.name}: {self.description} that deals {self.damage} damage. [{self.mana} Mana]"
+        damage_desc = f" that deals {self.damage} damage" if self.damage != -1 else ""
+        accuracy_desc =  f" | {self.accuracy}% Accuracy" if self.accuracy != -1 else ""
+        return f"{self.name}: {self.description}{damage_desc}. [Costs {self.mana} Mana{accuracy_desc}]"
         
-    def __call__(self, target):
+    def __call__(self, user, target):
         global moves_list
-        if len(self.special) <= 0:
-            basic_attack(self, player, target, f"{self.verb} {target.name}")
+        message = ["You", f"the {target.name}"] if user is player else [f"The {user.name}", "You"]
+        if (random.randint(0, 100) <= self.accuracy-target.evasion and target.evasion != -1) or self.accuracy == -1:
+            if len(self.special) <= 0:
+                basic_attack(self, user, target, f"{message[0]} {self.verb} {message[1]}")
+            else:
+                specials_list[self.special](user, target, message)
         else:
-            specials_list[self.special](target)
+            print(f"{message[0]} tried to use {self.name}, but it missed!")
+
+#########################################
+#          BACK-END FUNCTIONS           #
+#########################################
+           
+def player_move(target): #gets a move input from the player, checks if that move exists in the players list of known moves, and performs it if so.
+    while True:
+        response = input(f"You have {player.health}/{player.maxHP} HP and {p.mana}/{p.maxMana} Mana, what do you do? ")
+        response = response[0].upper()+response[1:].lower()
+        if response == "Options":
+            moves_list[response](player, target)
+        elif response in player.moves:
+            try:
+                if moves_list[response].mana <= p.mana:
+                    p.mana -= moves_list[response].mana
+                    moves_list[response](player, target)
+                    break
+                else:
+                    print(f"You don't have enough Mana to use that move! it requires {moves_list[response].mana} Mana!")
+            except Exception as e:
+                moves_list[response](player, target)
+                break
+        else:
+            print(f"Response \'{response}\' not recognized or unlearnt. Try \'options\' for a list of valid options.")
+
+def heal(target): #heals the target back to full health
+    target.health = target.maxHP
+
+def dummy_init(dummy):
+    return globals()[dummy]
+
+def fight(target): #starts a battle between the player and an enemy
+    global battling
+    battling = True
+    print(f"You begin battle with the enemy {target.name}!")
+    while True:
+        player_move(target)
+        if hpcheck(target) == True or battling == False:
+            break
+        print(f"The enemy {target.name} has {target.health}/{target.maxHP} HP remaining.")
+        target.creature_attack(player)
+        if hpcheck(target) == True or battling == False:
+            break
+    battling = False
+    heal(target)
+
+def hpcheck(target, checkup=False): #checks the hp of both the player and the target enemy, if one of their HP is at 0 then it ends the battle by returning True. Awards the target enemies xp and gold to the player if the player defeats them in combat.
+    if player.health <= 0:
+        if battling == True:
+            print(f"You've been defeated in battle by the enemy {target.name}...")
+            return True
+        print(f"You're too weak to carry on...")
+    elif target.health <= 0:
+        print(f"You defeated the enemy {target.name} in battle!")
+        player.gold += round(random.uniform(target.gold-target.gold*0.1, target.gold+target.gold*0.1))
+        player.XP += target.XP
+        print(f"You gained {target.gold} gold and {target.XP} XP!")
+        return True
+    if checkup == True:
+        print(f"HP of {target.name}: {target.health}/{target.maxHP}")
+        
+#########################################
+#                 MOVES                 #
+#########################################
         
 class m_Flee:
     def __init__(self):
@@ -213,28 +153,106 @@ class m_Flee:
     def __str__(self):
         return f"{self.name}: You attempt to flee combat."
         
-    def __call__(self, target):
+    def __call__(self, player, target):
         global battling
         battling = False
         print(f"You fled from the enemy {target.name}!")
 
+class m_Options:
+    def __init__(self):
+        self.name = "Options"
+        global moves_list
+        moves_list[self.name] = self
+        player.moves[self.name] = moves_list[self.name]
+        
+    def __str__(self):
+        return f"{self.name}: Returns a list of all available actions you can take during combat."
+        
+    def __call__(self, player, target):
+        global moves_list
+        print("List of valid options:")
+        for i in player.moves:
+            print(player.moves[i])
+
 #########################################
-#               CREATURES               #
+#               SPECIALS                #
 #########################################
 
-goblin = Creature("Goblin", 1, 10, 50, 35, [[Stab(), 70], [Claw(), 30], [Bite(), 50]], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
-wolf = Creature("Wolf", 3, 25, 200, 0, [[Claw(), 150], [Bite(), 80]], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
-player = Creature("Player", 1, 0, 100, 0, {}, "You encountered... yourself?")
+class s_Execute:
+    def __init__(self):
+        self.name = "Execute"
+        self.damage = 99999999999
+        specials_list[self.name] = self
+        
+    def __str__(self):
+        return f"{self.name}: Deletes the enemy from existence."
+        
+    def __call__(self, user, target, message):
+        global moves_list
+        basic_attack(self, user, target, f"{message[0]} deleted {message[1]} from existence")
+        
+class s_Uppercut:
+    def __init__(self):
+        self.name = "Uppercut"
+        self.damage = 50
+        specials_list[self.name] = self
+        
+    def __str__(self):
+        return f"{self.name}: A powerful uppercut that deals {self.damage} damage."
+        
+    def __call__(self, user, target, message):
+        global moves_list
+        basic_attack(self, user, target, f"{message[0]} struck {message[1]} with a powerful uppercut to the head")
+
+class s_Bowshot: #in the future, make a separate bowshot MOVE for the player, where they choose what arrow to shoot and what effects it has.
+    def __init__(self):
+        self.name = "Bowshot"
+        self.damage = 40
+        self.accuracy = 50
+        specials_list[self.name] = self
+        
+    def __str__(self):
+        return f"{self.name}"
+        
+    def __call__(self, user, target, message):
+        global moves_list
+        hit_chance = random.randint(0, 100)
+        if hit_chance+30 <= self.accuracy-target.evasion and target.evasion != -1:
+            damage_dealt = round(self.damage*1.2)
+            print(f"{message[0]} headshot {message[1]} with an arrow, dealing {damage_dealt} damage!")
+        elif hit_chance <= self.accuracy-target.evasion and target.evasion != -1:
+            damage_dealt = self.damage
+            print(f"{message[0]} struck {message[1]} with an arrow, dealing {damage_dealt} damage!")
+        elif hit_chance-30 <= self.accuracy-target.evasion and target.evasion != -1:
+            damage_dealt = round(self.damage*.3)
+            print(f"{message[0]} grazed {message[1]} with an arrow, dealing {damage_dealt} damage!")
+        else:
+            damage_dealt = 0
+            print(f"{message[0]} shot at {message[1]}, but it completely missed!")
+        target.health -= damage_dealt
 
 #########################################
 #               ATTACKS                 #
 #########################################
 
-slash = Attack(True, "Slash", "A swift slash with your weapon", 20, 100, 0, "You slashed the", "")
-stab = Attack(False, "Stab", "A harsh jab with your weapon", 30, 80, 5, "You stabbed the", "")
-punch = Attack(True, "Punch", "A quick punch with your first", 10, 100, 0, "You punched the", "")
-lunch = Attack(False, "Lunch", "Eat this", 50, 50, 10, "You fed the", "Lunch")
-execute = Attack(False, "Execute", "Execute this", -1, 100, 0, "You executed the", "Execute")
+slash = Attack(True, "Slash", "A swift slash with your weapon", 20, 100, 0, "slashed", "")
+stab = Attack(False, "Stab", "A harsh jab with your weapon", 30, 80, 5, "stabbed", "")
+punch = Attack(True, "Punch", "A quick punch with your fist", 10, 110, 0, "punched", "")
+uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 65, 10, "delivered a devastating uppercut to", "Uppercut")
+execute = Attack(False, "Execute", "You delete the enemy from existence", -1, -1, 0, "executed", "Execute")
+claw = Attack(False, "Claw", "A painful slash with your claws", 10, 90, 0, "clawed", "")
+bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 85, 0, "bit", "")
+bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, -1, 0, "shot", "Bowshot")
+
+#########################################
+#               CREATURES               #
+#########################################
+
+goblin = Creature("Goblin", 1, 10, 50, 35, 5, [["Stab", 70], ["Claw", 30], ["Bite", 50]], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
+wolf = Creature("Wolf", 2, 45, 150, 50, 15, [["Claw", 150], ["Bite", 80]], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
+skeleton_archer = Creature("Skeletal Archer", 2, 50, 80, 60, 0, [["Punch", 35], ["Bowshot", 65]], "An arrow suddenly strikes the ground right between your legs, and as you turn around you see a skeletal archer in the process of knocking another arrow!")
+wwe_champ = Creature("WWE Champion", 5, 200, 200, 150, 10, [["Punch", 70], ["Uppercut", 30]], "You approach a mysterious boxing ring as smoke fills up around you... just as you get the feeling you've arrived somewhere you shouldn't be you hear a bell ring and a burly man emerges from the fog looking ready for bloodshed.") #used for testing purposes
+elusive_ghost = Creature("Elusive Ghost", 3, 100, 30, 55, -1, [["Punch", 40], ["Claw", 40], ["Slash", 20]], "A swirling mist ahead of you congeals into a spectral figure... it's an elusive ghost! They're master of evasion!")
 
 #########################################
 #            INITIALIZATION             #

@@ -45,7 +45,6 @@ player = Creature("Player", 1, 0, 100, 0, 0, {}, "You encountered... yourself?")
 def basic_attack(move, user, target, message=f"the attacker attacked"): #used for both creature and player attacks that don't have any special functions to them, and simply do damage.
     target.health -= move.damage
     print(f"{message}, dealing {move.damage} damage!")
-
 #########################################
 
 class Attack:
@@ -173,6 +172,37 @@ class m_Options:
         print("List of valid options:")
         for i in player.moves:
             print(player.moves[i])
+            
+class m_Use:
+    def __init__(self):
+        self.name = "Use"
+        global moves_list
+        moves_list[self.name] = self
+        player.moves[self.name] = moves_list[self.name]
+        
+    def __str__(self):
+        return f"{self.name}: Use a consumable item."
+        
+    def __call__(self, player, target):
+        effects = {
+            "Health": player.health,
+            "Mana": p.mana,
+            "Energy": p.energy,
+            "Damage": target.health
+        }
+        p.inventory_check()
+        try:
+            response = p.items_list[f.capitalize(input("What item do you want to use? "))]
+            if response.quantity >= 1:
+                if response.effect != "":
+                    effects[response.effect] += response.val1
+                    print(f"{response.action[0]} {response.name} {response.action[1]} {response.val1} {response.action[2]})
+                else:
+                    print("this is a special item")
+            else:
+                print(f"You don't have any {response.name}'s!")
+        except:
+            print("Invalid response.")
 
 #########################################
 #               SPECIALS                #

@@ -7,6 +7,7 @@ import random
 import functions as f
 import playerstats as p
 import creatures as c
+import battle as b
 
 #########################################
 #           GLOBAL VARIABLES            #
@@ -26,7 +27,7 @@ class Enemy:
     def __call__(self, area):
         enemy = f.weighted_random(area.local_enemies)
         print(enemy.intro)
-        c.fight(enemy)
+        b.fight(enemy)
 
 class GoldPouch:
     def __init__(self):

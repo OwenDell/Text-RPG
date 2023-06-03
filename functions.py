@@ -30,3 +30,7 @@ def limit(inputs, maxes, mins=0): #takes 1 or more values for the inputs, maxes,
         inputs[index] = mins[index] if value < mins[index] else inputs[index]
     inputs = inputs[0] if len(inputs) == 1 else inputs
     return inputs
+
+def basic_attack(move, user, target, message=f"the attacker attacked"): #used for both creature and player attacks that don't have any special functions to them, and simply do damage.
+    target.health -= move.damage
+    print(f"{message}, dealing {move.damage} damage!")

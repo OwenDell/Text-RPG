@@ -53,7 +53,7 @@ class FindItem:
             if p.items_list[item].tier <= area.level and p.items_list[item].tier >= area.level-2:
                 potential_items.append(item)
         chosen_item = random.choice(potential_items)
-        p.items_list[chosen_item].quantity += 1
+        p.loot(p.items_list[chosen_item], 1)
         print(f"While exploring, you happened across a {chosen_item}!")
 
 

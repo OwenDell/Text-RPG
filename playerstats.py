@@ -2,7 +2,7 @@
 #               IMPORTS                 #
 #########################################
 
-
+import functions as f
 
 #########################################
 #           GLOBAL VARIABLES            #
@@ -57,9 +57,17 @@ class weapon:
 
 def inventory_check():
     print("Item Inventory:")
-    for item in p.items_list:
-        if p.items_list[item].quantity > 0:
-            print(f"{p.items_list[item].quantity}x {p.items_list[item].name}: {p.items_list[item].description}.")
+    for item in items_list:
+        if items_list[item].quantity > 0:
+            print(f"{items_list[item].quantity}x {items_list[item].name}: {items_list[item].description}.")
+
+def loot(item, quantity):
+    if isinstance(item, str):
+        item = items_list[f.capitalize(item)]
+        quantity = int(quantity)
+    item.quantity += quantity
+    operator = "-" if quantity < 0 else "+"
+    print(f"{operator}{quantity} {item.name}")
 
 #########################################
 #              EQUIPMENT                #

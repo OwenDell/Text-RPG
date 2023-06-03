@@ -20,6 +20,7 @@ activities_list = a.activities_list
 heal = c.heal
 dummy = c.wwe_champ
 fight = c.fight
+loot = p.loot
 p.current_area = a.chalgos
 test_iteration = 1 #used for the run_test function, that keeps track of how many tests have been run during this instance of the program.
 running = True #while true, the main gameplay loop will continue running. Ends with either the end_game() function or if the player dies.
@@ -44,6 +45,7 @@ def converter(*args): #converts string inputs into either global objects, intege
     return args
 
 def learn_move(move_name): #adds a new move to the player.moves dictionary
+    move_name = f.capitalize(move_name)
     try:
         player.moves[move_name] = moves_list[move_name]
         print(f"You learned {move_name}!")
@@ -87,8 +89,11 @@ def duel(duelist1, duelist2): #mostly just used for testing, at least currently.
         print(f"The {victor.name} has felled the {loser.name} in single combat, earning them {loser.gold} gold!")
 
 def teleport(area):
-    p.current_area = a.areas[area]
-    print(f"You have arrived at {p.current_area.name}.")
+    try:
+        p.current_area = a.areas[f.capitalize(area)]
+        print(f"You have arrived at {p.current_area.name}.")
+    except:
+        print(f"Invalid area name \'{f.capitalize(area)}\'")
 
 #########################################
 #          FRONT-END FUNCTIONS          #
@@ -131,6 +136,9 @@ def f_commands(): #prints a list of all the front-end functions to the player, w
             
 def f_inventory():
     p.inventory_check()
+
+def f_use():
+    c.moves_list["Use"](player, player)
 
 #########################################
 #             GAMEPLAY LOOP             #

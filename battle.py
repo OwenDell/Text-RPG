@@ -248,8 +248,8 @@ class s_Bowshot: #in the future, make a separate bowshot MOVE for the player, wh
 
 punch = Attack(True, "Punch", "A quick punch with your fist", 10, 110, 0, "punched", "")
 slash = Attack(True, "Slash", "A swift slash with your weapon", 20, 100, 0, "slashed", "")
-stab = Attack(False, "Stab", "A harsh jab with your weapon", 30, 85, 5, "stabbed", "")
-uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 75, 10, "delivered a devastating uppercut to", "Uppercut")
+stab = Attack(False, "Stab", "A harsh jab with your weapon", 30, 90, 5, "stabbed", "")
+uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 80, 10, "delivered a devastating uppercut to", "Uppercut")
 execute = Attack(False, "Execute", "You delete the enemy from existence", -1, -1, 0, "executed", "Execute")
 claw = Attack(False, "Claw", "A painful slash with your claws", 10, 90, 0, "clawed", "")
 bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 85, 0, "bit", "")

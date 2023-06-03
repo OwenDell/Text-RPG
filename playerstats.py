@@ -24,6 +24,7 @@ mana = 20
 maxMana = 20
 energy = 100
 maxEnergy = 100
+reqXP = 250
 
 #########################################
 #               CLASSES                 #

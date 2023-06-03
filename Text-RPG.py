@@ -140,6 +140,9 @@ def f_inventory():
 def f_use():
     c.moves_list["Use"](player, player)
 
+def f_status():
+    print(f"Player Stats:\nLevel: {player.level}\nExperience: {player.XP}/{p.reqXP}\nHealth: {player.health}/{player.maxHP}\nMana: {p.mana}/{p.maxMana}\nEnergy: {p.energy}/{p.maxEnergy}\nGold: {player.gold}")
+
 #########################################
 #             GAMEPLAY LOOP             #
 #########################################

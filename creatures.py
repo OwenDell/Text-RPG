@@ -63,4 +63,3 @@ wolf = Creature("Wolf", 2, 45, 150, 50, 15, [["Claw", 150], ["Bite", 80]], "You 
 skeleton_archer = Creature("Skeletal Archer", 2, 50, 80, 60, 0, [["Punch", 35], ["Bowshot", 65]], "An arrow suddenly strikes the ground right between your legs, and as you turn around you see a skeletal archer in the process of knocking another arrow!")
 wwe_champ = Creature("WWE Champion", 5, 200, 200, 150, 10, [["Punch", 70], ["Uppercut", 30]], "You approach a mysterious boxing ring as smoke fills up around you... just as you get the feeling you've arrived somewhere you shouldn't be you hear a bell ring and a burly man emerges from the fog looking ready for bloodshed.") #used for testing purposes
 elusive_ghost = Creature("Elusive Ghost", 3, 100, 30, 55, -1, [["Punch", 40], ["Claw", 40], ["Slash", 20]], "A swirling mist ahead of you congeals into a spectral figure... it's an elusive ghost! They're master of evasion!")
-

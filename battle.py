@@ -254,3 +254,12 @@ execute = Attack(False, "Execute", "You delete the enemy from existence", -1, -1
 claw = Attack(False, "Claw", "A painful slash with your claws", 10, 90, 0, "clawed", "")
 bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 85, 0, "bit", "")
 bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, -1, 0, "shot", "Bowshot")
+
+#########################################
+#            INITIALIZATION             #
+#########################################
+
+temp_globals = globals().copy() #initializes all the player moves, which add themselves to a list of possible player moves
+for globals_object in temp_globals:
+    if globals_object[:2] == "m_" or globals_object[:2] == "s_":
+        globals()[globals_object]()

@@ -42,11 +42,11 @@ def basic_attack(move, user, target, message=f"the attacker attacked"): #used fo
     target.health -= move.damage
     print(f"{message}, dealing {move.damage} damage!")
 
-def print_override(string):
+def print_override(string): #replacement for the default print function that adds a check to see if 'printing' is enabled, can be very convenient at times when you want functions to run in the background without them spewing out all their associated text.
     if printing == True:
         print(string)
 
-def header(string=""):
+def header(string=""): #this is used to print title bars to separate large portions of text such as when printing long vertical lists, used for aesthetic appeal
     braces = "[]" if len(string) > 0 else "--"
     side_dashes = ["-"] * (24-round(len(string)/2))
     print_override("".join(side_dashes) + braces[0] + string + braces[1] + "".join(side_dashes))

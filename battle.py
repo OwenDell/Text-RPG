@@ -6,6 +6,7 @@ import random
 import functions as f
 import playerstats as p
 import creatures as c
+import statuses as s
 
 #########################################
 #           GLOBAL VARIABLES            #
@@ -14,6 +15,7 @@ import creatures as c
 player = c.player
 moves_list = c.moves_list
 specials_list = c.specials_list
+effects_list = s.statuses_list
 basic_attack = f.basic_attack
 test_dummy = ''
 battling = False
@@ -52,7 +54,7 @@ class Attack:
                 specials_list[self.special](user, target, message)
         else:
             print(f"{message[0]} tried to use {self.name}, but it missed!")
-        player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])
+        user.health, p.mana, p.energy, target.health = f.limit([user.health, p.mana, p.energy, target.health], [user.maxHP, p.maxMana, p.maxEnergy, target.maxHP])
 
 #########################################
 #          BACK-END FUNCTIONS           #
@@ -76,7 +78,7 @@ def player_move(target): #gets a move input from the player, checks if that move
                 break
         else:
             print(f"Response \'{response}\' not recognized or unlearnt. Try \'options\' for a list of valid options.")
-        player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])
+        player.health, p.mana, p.energy, target.health = f.limit([player.health, p.mana, p.energy, target.health], [player.maxHP, p.maxMana, p.maxEnergy, target.maxHP])
 
 def heal(target): #heals the target back to full health
     target.health = target.maxHP
@@ -93,7 +95,7 @@ def fight(target): #starts a battle between the player and an enemy
         target.creature_attack(player)
         if hpcheck(target) == True or battling == False:
             break
-    player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])
+    player.health, p.mana, p.energy, target.health = f.limit([player.health, p.mana, p.energy, target.health], [player.maxHP, p.maxMana, p.maxEnergy, target.maxHP])
     battling = False
     heal(target)
 
@@ -164,16 +166,16 @@ class m_Use:
             response = p.items_list[f.capitalize(input("What item do you want to use? "))]
             if response.quantity >= 1:
                 response.quantity -= 1
-                if response.effect == "Damage" and target is player:
+                if response.affect == "Damage" and target is player:
                     print(f"You can't use a {response.name} on yourself!")
                 else:
-                    if response.effect != "":
-                        player.health = player.health + response.val1 if response.effect == "Health" else player.health
-                        p.mana = p.mana + response.val1 if response.effect == "Mana" else p.mana
-                        p.energy = p.energy + response.val1 if response.effect == "Energy" else p.energy
-                        target.health = target.health - response.val1 if response.effect == "Damage" else target.health
+                    if response.affect != "":
+                        player.health = player.health + response.val1 if response.affect == "Health" else player.health
+                        p.mana = p.mana + response.val1 if response.affect == "Mana" else p.mana
+                        p.energy = p.energy + response.val1 if response.affect == "Energy" else p.energy
+                        target.health = target.health - response.val1 if response.affect == "Damage" else target.health
                         print(f"{response.action[0]} {response.name}, {response.action[1]} {response.val1} {response.action[2]}.")
-                    else:
+                    if len(response.effects > 0):
                         print("this is a special item")
             else:
                 print(f"You don't have any {response.name}'s!")
@@ -259,7 +261,7 @@ bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, -1,
 #            INITIALIZATION             #
 #########################################
 
-temp_globals = globals().copy() #initializes all the player moves, which add themselves to a list of possible player moves
+temp_globals = globals().copy() #initializes all the moves and specials, which add themselves to moves_list and specials_list
 for globals_object in temp_globals:
     if globals_object[:2] == "m_" or globals_object[:2] == "s_":
         globals()[globals_object]()

@@ -8,6 +8,7 @@ import functions as f
 import playerstats as p
 import creatures as c
 import battle as b
+import statuses as s
 
 #########################################
 #           GLOBAL VARIABLES            #

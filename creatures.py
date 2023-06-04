@@ -29,6 +29,7 @@ class Creature:
         self.evasion = evasion
         self.moves = moves
         self.intro = intro
+        self.statuses = []
         enemies.append(self)
     
     def __str__(self):
@@ -48,10 +49,12 @@ def dummy_init(dummy):
 #            INITIALIZATION             #
 #########################################
 
-temp_globals = globals().copy() #initializes all the player moves, which add themselves to a list of possible player moves
+""" #not necessary anymore but is being left here for reference sake.
+temp_globals = globals().copy() 
 for globals_object in temp_globals:
     if globals_object[:2] == "m_" or globals_object[:2] == "s_":
         globals()[globals_object]()
+"""
 
 #########################################
 #               CREATURES               #

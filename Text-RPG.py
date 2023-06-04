@@ -10,6 +10,7 @@ import creatures as c
 import areas as a
 import encounters as e
 import battle as b
+import statuses as s
 
 #########################################
 #           GLOBAL VARIABLES            #

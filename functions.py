@@ -5,6 +5,13 @@
 import random
 
 #########################################
+#           GLOBAL VARIABLES            #
+#########################################
+
+printing = True
+_print = print
+
+#########################################
 #          BACK-END FUNCTIONS           #
 #########################################
 
@@ -34,3 +41,12 @@ def limit(inputs, maxes, mins=0): #takes 1 or more values for the inputs, maxes,
 def basic_attack(move, user, target, message=f"the attacker attacked"): #used for both creature and player attacks that don't have any special functions to them, and simply do damage.
     target.health -= move.damage
     print(f"{message}, dealing {move.damage} damage!")
+
+def print_override(string):
+    if printing == True:
+        print(string)
+
+def header(string=""):
+    braces = "[]" if len(string) > 0 else "--"
+    side_dashes = ["-"] * (24-round(len(string)/2))
+    print_override("".join(side_dashes) + braces[0] + string + braces[1] + "".join(side_dashes))

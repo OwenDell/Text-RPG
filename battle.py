@@ -12,10 +12,11 @@ import statuses as s
 #           GLOBAL VARIABLES            #
 #########################################
 
+print = f.print_override
 player = c.player
 moves_list = c.moves_list
 specials_list = c.specials_list
-effects_list = s.statuses_list
+statuses_list = s.statuses_list
 basic_attack = f.basic_attack
 test_dummy = ''
 battling = False
@@ -86,23 +87,41 @@ def heal(target): #heals the target back to full health
 def fight(target): #starts a battle between the player and an enemy
     global battling
     battling = True
+    turn_count = 1
     print(f"You begin battle with the enemy {target.name}!")
     while True:
+        f.header(f"Battle with {target.name}: Turn {turn_count}")
+        s.recur_statuses(player)
+        if hpcheck(target) == True or battling == False:
+            break
         player_move(target)
         if hpcheck(target) == True or battling == False:
             break
+        s.recur_statuses(target)
         print(f"The enemy {target.name} has {target.health}/{target.maxHP} HP remaining.")
+        if hpcheck(target) == True or battling == False:
+            break
         target.creature_attack(player)
         if hpcheck(target) == True or battling == False:
             break
-    player.health, p.mana, p.energy, target.health = f.limit([player.health, p.mana, p.energy, target.health], [player.maxHP, p.maxMana, p.maxEnergy, target.maxHP])
+        turn_count += 1
+    f.header()
+    player.cures_list["Conclusion"] = True
     battling = False
+    f.printing = False
+    s.recur_statuses(target, True)
+    f.printing = True
+    s.cure_check(player)
+    player.health, p.mana, p.energy, target.health = f.limit([player.health, p.mana, p.energy, target.health], [player.maxHP, p.maxMana, p.maxEnergy, target.maxHP])
     heal(target)
 
 def hpcheck(target, checkup=False): #checks the hp of both the player and the target enemy, if one of their HP is at 0 then it ends the battle by returning True. Awards the target enemies xp and gold to the player if the player defeats them in combat.
+    s.cure_check(player)
+    s.cure_check(target)
     if player.health <= 0:
         if battling == True:
             print(f"You've been defeated in battle by the enemy {target.name}...")
+            player.cures_list["Defeat"] = True
             return True
         print(f"You're too weak to carry on...")
     elif target.health <= 0:
@@ -111,6 +130,7 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
         player.gold += gold_gain
         player.XP += target.XP
         print(f"You gained {gold_gain} gold and {target.XP} XP!")
+        player.cures_list["Victory"] = True
         return True
     if checkup == True:
         print(f"HP of {target.name}: {target.health}/{target.maxHP}")
@@ -131,9 +151,10 @@ class m_Options:
         
     def __call__(self, player, target):
         global moves_list
-        print("List of valid options:")
+        f.header("Available Actions")
         for i in player.moves:
             print(player.moves[i])
+        f.header()
     
 class m_Flee:
     def __init__(self):
@@ -165,18 +186,25 @@ class m_Use:
         try:
             response = p.items_list[f.capitalize(input("What item do you want to use? "))]
             if response.quantity >= 1:
-                response.quantity -= 1
                 if response.affect == "Damage" and target is player:
                     print(f"You can't use a {response.name} on yourself!")
-                else:
+                elif (random.randint(0, 100) <= response.accuracy-target.evasion and target.evasion != -1) or response.accuracy == -1:
+                    response.quantity -= 1
                     if response.affect != "":
                         player.health = player.health + response.val1 if response.affect == "Health" else player.health
                         p.mana = p.mana + response.val1 if response.affect == "Mana" else p.mana
                         p.energy = p.energy + response.val1 if response.affect == "Energy" else p.energy
                         target.health = target.health - response.val1 if response.affect == "Damage" else target.health
-                        print(f"{response.action[0]} {response.name}, {response.action[1]} {response.val1} {response.action[2]}.")
-                    if len(response.effects > 0):
-                        print("this is a special item")
+                        if response.action == "Potion":
+                            print(f"You drank a {response.name}.")
+                        else:
+                            print(f"{response.action[0]} {response.name}, {response.action[1]} {response.val1} {response.action[2]}.")
+                    for eff in response.effects:
+                        eff_target = player if eff[2] == "user" else target
+                        statuses_list[eff[0]].apply(eff_target, eff[1])
+                else:
+                    response.quantity -= 1
+                    print(f"You tried to use {response.name}, but it missed!")
             else:
                 print(f"You don't have any {response.name}'s!")
                 if battling == True:
@@ -245,6 +273,15 @@ class s_Bowshot: #in the future, make a separate bowshot MOVE for the player, wh
         target.health -= damage_dealt
 
 #########################################
+#            INITIALIZATION             #
+#########################################
+
+temp_globals = globals().copy() #initializes all the moves and specials, which add themselves to moves_list and specials_list
+for globals_object in temp_globals:
+    if globals_object[:2] == "m_" or globals_object[:2] == "s_":
+        globals()[globals_object]()
+
+#########################################
 #               ATTACKS                 #
 #########################################
 
@@ -256,12 +293,3 @@ execute = Attack(False, "Execute", "You delete the enemy from existence", -1, -1
 claw = Attack(False, "Claw", "A painful slash with your claws", 10, 90, 0, "clawed", "")
 bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 85, 0, "bit", "")
 bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, -1, 0, "shot", "Bowshot")
-
-#########################################
-#            INITIALIZATION             #
-#########################################
-
-temp_globals = globals().copy() #initializes all the moves and specials, which add themselves to moves_list and specials_list
-for globals_object in temp_globals:
-    if globals_object[:2] == "m_" or globals_object[:2] == "s_":
-        globals()[globals_object]()

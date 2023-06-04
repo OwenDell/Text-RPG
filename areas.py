@@ -14,6 +14,7 @@ import statuses as s
 #           GLOBAL VARIABLES            #
 #########################################
 
+print = f.print_override
 areas = {} #a list of all areas that gets filled every time a new area is initialized.
 activities_list = {}
 k_start = True

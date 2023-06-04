@@ -16,13 +16,16 @@ import statuses as s
 #           GLOBAL VARIABLES            #
 #########################################
 
+print = f.print_override
 player = c.player
 moves_list = c.moves_list
 activities_list = a.activities_list
 heal = b.heal
+cleanse = s.cleanse
 dummy = c.wwe_champ
 fight = b.fight
 loot = p.loot
+commands_list = {}
 p.current_area = a.chalgos
 test_iteration = 1 #used for the run_test function, that keeps track of how many tests have been run during this instance of the program.
 running = True #while true, the main gameplay loop will continue running. Ends with either the end_game() function or if the player dies.
@@ -97,6 +100,14 @@ def teleport(area):
     except:
         print(f"Invalid area name \'{f.capitalize(area)}\'")
 
+def devmode(allitems=False, allmoves=False):
+    if allitems != False:
+        for item in p.items_list:
+            loot(item, 999)
+    if allmoves != False:
+        for move in c.moves_list:
+            learn_move(move)
+
 #########################################
 #          FRONT-END FUNCTIONS          #
 #########################################
@@ -126,15 +137,15 @@ def f_devcmds(): #hidden command that the player can run that allows them to run
         print("Unrecognized command.")
         
 def f_commands(): #prints a list of all the front-end functions to the player, with the exception of devcmds (devcmds must be the first of the front-end functions to be initialized for this to work)
-    commands_list = []
-    for globals_object in globals():
-        if globals_object[:2] == "f_":
-            commands_list.append(globals_object[2:])
-    print(f"""List of valid commands:\n{", ".join(commands_list[1:])}""")
-    print(f"List of available activities in {p.current_area.name}:")
+    f.header("Commands List")
+    for command in commands_list:
+        if command != "Devcmds":
+            print(commands_list[command])
+    f.header("Activities List")
     for activity in activities_list:
         if activity in p.current_area.activities:
             print(activities_list[activity])
+    f.header()
             
 def f_inventory():
     p.inventory_check()
@@ -142,21 +153,56 @@ def f_inventory():
 def f_use():
     c.moves_list["Use"](player, player)
 
-def f_status():
-    print(f"Player Stats:\nLevel: {player.level}\nExperience: {player.XP}/{p.reqXP}\nHealth: {player.health}/{player.maxHP}\nMana: {p.mana}/{p.maxMana}\nEnergy: {p.energy}/{p.maxEnergy}\nGold: {player.gold}")
+def f_stats():
+    f.header("Player Stats")
+    print(f"Level: {player.level}\nExperience: {player.XP}/{p.reqXP}\nHealth: {player.health}/{player.maxHP}\nMana: {p.mana}/{p.maxMana}\nEnergy: {p.energy}/{p.maxEnergy}\nGold: {player.gold}\nStrength: {p.strength} (+{p.effective_strength-p.strength})\
+          \nDexterity: {p.dexterity} (+{p.effective_dexterity-p.dexterity})\nIntelligence: {p.intelligence} (+{p.effective_intelligence-p.intelligence})")
+    f.header()
+    
+def f_status_effects():
+    f.header("Status Effects")
+    for item in player.statuses:
+        print(s.statuses_list[item[0]])
+    if len(player.statuses) < 1:
+        print("You don't have any status effects.")
+    f.header()
+
+#########################################
+#               COMMANDS                #
+#########################################
+
+class Command:
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+        commands_list[self.name] = self
+
+    def __str__(self):
+        return f"{self.name}: {self.description}."
+
+    def __call__(self):
+        globals()["f_"+"_".join(self.name.lower().split())]()
+
+devcmds = Command("Devcmds", "Enter a developer command")
+commands = Command("Commands", "Gives a list of all valid commands")
+inventory = Command("Inventory", "Gives a list of all items in your inventory")
+stats = Command("Stats", "Prints out your characters stats")
+status_effects = Command("Status Effects", "Gives a list of all of your current status effects")
+use = Command("Use", "Use a consumable item in your inventory while out of combat")
 
 #########################################
 #             GAMEPLAY LOOP             #
 #########################################
 
 while running == True:
-    response = "f_" + input("What would you like to do? ")
+    s.cure_check(player)
+    response = f.capitalize(input("What would you like to do? "))
     try:
-        if response[2].upper()+response[3:].lower() in p.current_area.activities:
-            activities_list[response[2].upper()+response[3:].lower()](p.current_area)
+        if response in p.current_area.activities:
+            activities_list[response](p.current_area)
         else:
-            globals()[response.lower()]()
+            commands_list[response]()
     except:
-        print(f"Response \'{response[2:]}\' not recognized. Try \'commands\' for a list of valid options.")
+        print(f"Response \'{response}\' not recognized. Try \'Commands\' for a list of valid options.")
         
 print("Game has ended.")

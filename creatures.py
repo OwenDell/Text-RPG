@@ -10,6 +10,7 @@ import playerstats as p
 #           GLOBAL VARIABLES            #
 #########################################
 
+print = f.print_override
 enemies = [] #a list of all enemies that gets filled every time a new creature is initialized. No purpose for it currently.
 moves_list = {} #a dictionary of all player moves in the game that gets filled with they're initialized. The key is the string name of the move, and the value is the move class object itself, making it easy to call a desired move using the string input from the player.
 specials_list = {} #a dictionary of special moves that are stored separately from the normal moves, as the move in moves_list is what actually gets called by the player which then calls the version in specials_list
@@ -30,6 +31,14 @@ class Creature:
         self.moves = moves
         self.intro = intro
         self.statuses = []
+        self.cures_list = { #this is stored here as it can't be universal or else the player using an antidote would trigger the enemy to be cured of their poison or visa versa
+            "Conclusion": False,
+            "Victory": False,
+            "Defeat": False,
+            "Cleanse": False,
+            "Lesser Antidote": False,
+            "Antidote": False
+        }
         enemies.append(self)
     
     def __str__(self):

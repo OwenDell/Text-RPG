@@ -3,6 +3,7 @@
 #########################################
 
 import random
+import time
 from inspect import signature
 import functions as f
 import playerstats as p
@@ -17,6 +18,7 @@ import statuses as s
 #########################################
 
 print = f.print_override
+sleep = f.sleep
 player = c.player
 moves_list = c.moves_list
 activities_list = a.activities_list
@@ -100,11 +102,13 @@ def teleport(area):
     except:
         print(f"Invalid area name \'{f.capitalize(area)}\'")
 
-def devmode(allitems=False, allmoves=False):
-    if allitems != False:
+def devmode(sleepy=False, allitems=False, allmoves=False):
+    if sleepy != False and sleepy != "False":
+        f.sleeping = False
+    if allitems != False and allitems != "False":
         for item in p.items_list:
             loot(item, 999)
-    if allmoves != False:
+    if allmoves != False and allmoves != "False":
         for move in c.moves_list:
             learn_move(move)
 
@@ -137,35 +141,59 @@ def f_devcmds(): #hidden command that the player can run that allows them to run
         print("Unrecognized command.")
         
 def f_commands(): #prints a list of all the front-end functions to the player, with the exception of devcmds (devcmds must be the first of the front-end functions to be initialized for this to work)
-    f.header("Commands List")
+    f.header("Commands List", 0.5)
     for command in commands_list:
         if command != "Devcmds":
-            print(commands_list[command])
-    f.header("Activities List")
+            print(commands_list[command], 0.3)
+    f.header("Activities List", 0.5)
     for activity in activities_list:
         if activity in p.current_area.activities:
-            print(activities_list[activity])
-    f.header()
+            print(activities_list[activity], 0.3)
+    f.header("", 0.5)
+    
+def f_settings():
+    f.header("Settings", 0.5)
+    print(f"Text Delay: {f.sleepmultiplier}x Speed", 0.3)
+    f.header("", 0.5)
+    response = f.capitalize(input("What setting do you want to change? "))
+    if response == "Text Delay":
+        response2 = input(f"What do you want to set {response} to? ")
+        try:
+            f.speedmultiplier = float(response2)
+            print(f"{response} changed to {response2}x Speed.")
+        except:
+            print(f"Invalid response \'{response2}\'.")
+    else:
+        print(f"Invalid option \'{response}\'.")
             
 def f_inventory():
-    p.inventory_check()
+    p.inventory_check(0.3)
 
 def f_use():
     c.moves_list["Use"](player, player)
 
 def f_stats():
-    f.header("Player Stats")
-    print(f"Level: {player.level}\nExperience: {player.XP}/{p.reqXP}\nHealth: {player.health}/{player.maxHP}\nMana: {p.mana}/{p.maxMana}\nEnergy: {p.energy}/{p.maxEnergy}\nGold: {player.gold}\nStrength: {p.strength} (+{p.effective_strength-p.strength})\
-          \nDexterity: {p.dexterity} (+{p.effective_dexterity-p.dexterity})\nIntelligence: {p.intelligence} (+{p.effective_intelligence-p.intelligence})")
-    f.header()
+    f.header("Player Stats", 0.5)
+    #print(f"Level: {player.level}\nExperience: {player.XP}/{p.reqXP}\nHealth: {player.health}/{player.maxHP}\nMana: {p.mana}/{p.maxMana}\nEnergy: {p.energy}/{p.maxEnergy}\nGold: {player.gold}\nStrength: {p.strength} (+{p.effective_strength-p.strength})\
+          #\nDexterity: {p.dexterity} (+{p.effective_dexterity-p.dexterity})\nIntelligence: {p.intelligence} (+{p.effective_intelligence-p.intelligence})")
+    print(f"Level: {player.level}", 0.3)
+    print(f"Experience: {player.XP}/{p.reqXP}", 0.3)
+    print(f"Health: {player.health}/{player.maxHP}", 0.3)
+    print(f"Mana: {p.mana}/{p.maxMana}", 0.3)
+    print(f"Energy: {p.energy}/{p.maxEnergy}", 0.3)
+    print(f"Gold: {player.gold}", 0.3)
+    print(f"Strength: {p.strength} (+{p.effective_strength-p.strength})", 0.3)
+    print(f"Dexterity: {p.dexterity} (+{p.effective_dexterity-p.dexterity})", 0.3)
+    print(f"Intelligence: {p.intelligence} (+{p.effective_intelligence-p.intelligence})", 0.3)
+    f.header("", 0.5)
     
 def f_status_effects():
-    f.header("Status Effects")
+    f.header("Status Effects", 0.5)
     for item in player.statuses:
-        print(s.statuses_list[item[0]])
+        print(s.statuses_list[item[0]], 0.3)
     if len(player.statuses) < 1:
-        print("You don't have any status effects.")
-    f.header()
+        print("You don't have any status effects.", 0.5)
+    f.header("", 0.5)
 
 #########################################
 #               COMMANDS                #
@@ -184,6 +212,7 @@ class Command:
         globals()["f_"+"_".join(self.name.lower().split())]()
 
 devcmds = Command("Devcmds", "Enter a developer command")
+settings = Command("Settings", "View and change the game settings")
 commands = Command("Commands", "Gives a list of all valid commands")
 inventory = Command("Inventory", "Gives a list of all items in your inventory")
 stats = Command("Stats", "Prints out your characters stats")
@@ -196,13 +225,16 @@ use = Command("Use", "Use a consumable item in your inventory while out of comba
 
 while running == True:
     s.cure_check(player)
+    sleep(1.2)
     response = f.capitalize(input("What would you like to do? "))
     try:
+        sleep(0.5)
         if response in p.current_area.activities:
             activities_list[response](p.current_area)
         else:
             commands_list[response]()
     except:
+        sleep(0)
         print(f"Response \'{response}\' not recognized. Try \'Commands\' for a list of valid options.")
         
 print("Game has ended.")

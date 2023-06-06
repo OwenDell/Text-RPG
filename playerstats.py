@@ -9,6 +9,7 @@ import functions as f
 #########################################
 
 print = f.print_override
+sleep = f.sleep
 items_list = {}
 equipment_list = {}
 health_potion_action = ["You drank a", "healing", "HP"]
@@ -66,12 +67,12 @@ class weapon: #for equipment, store every piece of equipment in equipment_list. 
 #          BACK-END FUNCTIONS           #
 #########################################
 
-def inventory_check():
-    f.header("Inventory")
+def inventory_check(sleeptime=0):
+    f.header("Inventory", 0.5)
     for item in items_list:
         if items_list[item].quantity > 0:
-            print(f"{items_list[item].quantity}x {items_list[item].name}: {items_list[item].description}.")
-    f.header()
+            print(f"{items_list[item].quantity}x {items_list[item].name}: {items_list[item].description}.", sleeptime)
+    f.header("", 0.5)
 
 def loot(item, quantity):
     if isinstance(item, str):

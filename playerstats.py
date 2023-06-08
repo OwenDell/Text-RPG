@@ -34,6 +34,7 @@ intelligence = 1
 effective_strength = 1
 effective_dexterity = 1
 effective_intelligence = 1
+speed = 100
 
 #########################################
 #               CLASSES                 #
@@ -72,7 +73,7 @@ def inventory_check(sleeptime=0):
     for item in items_list:
         if items_list[item].quantity > 0:
             print(f"{items_list[item].quantity}x {items_list[item].name}: {items_list[item].description}.", sleeptime)
-    f.header("", 0.5)
+    f.header("", 0.7)
 
 def loot(item, quantity):
     if isinstance(item, str):
@@ -80,7 +81,7 @@ def loot(item, quantity):
         quantity = int(quantity)
     item.quantity += quantity
     operator = "-" if quantity < 0 else "+"
-    print(f"{operator}{quantity} {item.name}")
+    print(f"{operator}{quantity} {item.name}", 0.15)
 
 #########################################
 #              EQUIPMENT                #

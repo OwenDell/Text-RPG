@@ -11,6 +11,7 @@ import playerstats as p
 #########################################
 
 print = f.print_override
+sleep = f.sleep
 enemies = [] #a list of all enemies that gets filled every time a new creature is initialized. No purpose for it currently.
 moves_list = {} #a dictionary of all player moves in the game that gets filled with they're initialized. The key is the string name of the move, and the value is the move class object itself, making it easy to call a desired move using the string input from the player.
 specials_list = {} #a dictionary of special moves that are stored separately from the normal moves, as the move in moves_list is what actually gets called by the player which then calls the version in specials_list
@@ -36,6 +37,7 @@ class Creature:
             "Victory": False,
             "Defeat": False,
             "Cleanse": False,
+            "Saturated": True,
             "Lesser Antidote": False,
             "Antidote": False
         }
@@ -75,3 +77,4 @@ wolf = Creature("Wolf", 2, 45, 150, 50, 10, [["Claw", 150], ["Bite", 80]], "You 
 skeleton_archer = Creature("Skeletal Archer", 2, 50, 80, 60, 0, [["Punch", 35], ["Bowshot", 65]], "An arrow suddenly strikes the ground right between your legs, and as you turn around you see a skeletal archer in the process of knocking another arrow!")
 wwe_champ = Creature("WWE Champion", 5, 200, 200, 150, 10, [["Punch", 70], ["Uppercut", 30]], "You approach a mysterious boxing ring as smoke fills up around you... just as you get the feeling you've arrived somewhere you shouldn't be you hear a bell ring and a burly man emerges from the fog looking ready for bloodshed.") #used for testing purposes
 elusive_ghost = Creature("Elusive Ghost", 3, 100, 30, 55, -1, [["Punch", 40], ["Claw", 40], ["Slash", 20]], "A swirling mist ahead of you congeals into a spectral figure... it's an elusive ghost! They're master of evasion!")
+bandit = Creature("Bandit", 2, 25, 70, 50, 0, [["Stab", 50], ["Slash", 70], ["Bowshot", 20], ["Punch", 30]], "As your walking along a dirt path a grizzled man jumps out from behind a tree in front of you! 'Surrender your posessions or die!' he shouts at you. He gives you a mean snear as you draw your weapon...")

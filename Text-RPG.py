@@ -55,9 +55,9 @@ def learn_move(move_name): #adds a new move to the player.moves dictionary
     move_name = f.capitalize(move_name)
     try:
         player.moves[move_name] = moves_list[move_name]
-        print(f"You learned {move_name}!")
+        print(f"You learned {move_name}!", 0.15)
     except:
-        print(f"Unrecognized move: \'{move_name}\'.")
+        print(f"Unrecognized move: \'{move_name}\'.", 0.5)
     
 def run_test(*args): #used for running tests, mainly intended to be used through devcmds, where you can feed in however many arguments you want and it will try to print them back to you.
     global test_iteration
@@ -98,13 +98,12 @@ def duel(duelist1, duelist2): #mostly just used for testing, at least currently.
 def teleport(area):
     try:
         p.current_area = a.areas[f.capitalize(area)]
-        print(f"You have arrived at {p.current_area.name}.")
+        p.position = a.areas[f.capitalize(area)].distance
+        print(f"You have arrived at {p.current_area.name}!", 0.7)
     except:
-        print(f"Invalid area name \'{f.capitalize(area)}\'")
+        print(f"Invalid area name \'{f.capitalize(area)}\'", 0.3)
 
-def devmode(sleepy=False, allitems=False, allmoves=False):
-    if sleepy != False and sleepy != "False":
-        f.sleeping = False
+def devmode(allitems=False, allmoves=False):
     if allitems != False and allitems != "False":
         for item in p.items_list:
             loot(item, 999)
@@ -153,13 +152,15 @@ def f_commands(): #prints a list of all the front-end functions to the player, w
     
 def f_settings():
     f.header("Settings", 0.5)
-    print(f"Text Delay: {f.sleepmultiplier}x Speed", 0.3)
+    print(f"Text Speed: {f.sleepmultiplier}x Speed", 0.3)
     f.header("", 0.5)
     response = f.capitalize(input("What setting do you want to change? "))
-    if response == "Text Delay":
+    if response == "Text Speed":
         response2 = input(f"What do you want to set {response} to? ")
         try:
-            f.speedmultiplier = float(response2)
+            if float(response2) <= 0:
+                response2 = 999
+            f.sleepmultiplier = float(response2)
             print(f"{response} changed to {response2}x Speed.")
         except:
             print(f"Invalid response \'{response2}\'.")
@@ -167,7 +168,7 @@ def f_settings():
         print(f"Invalid option \'{response}\'.")
             
 def f_inventory():
-    p.inventory_check(0.3)
+    p.inventory_check(0.15)
 
 def f_use():
     c.moves_list["Use"](player, player)
@@ -176,15 +177,20 @@ def f_stats():
     f.header("Player Stats", 0.5)
     #print(f"Level: {player.level}\nExperience: {player.XP}/{p.reqXP}\nHealth: {player.health}/{player.maxHP}\nMana: {p.mana}/{p.maxMana}\nEnergy: {p.energy}/{p.maxEnergy}\nGold: {player.gold}\nStrength: {p.strength} (+{p.effective_strength-p.strength})\
           #\nDexterity: {p.dexterity} (+{p.effective_dexterity-p.dexterity})\nIntelligence: {p.intelligence} (+{p.effective_intelligence-p.intelligence})")
+    print(f"Current Area: {p.current_area.name}", 0.3)
     print(f"Level: {player.level}", 0.3)
     print(f"Experience: {player.XP}/{p.reqXP}", 0.3)
     print(f"Health: {player.health}/{player.maxHP}", 0.3)
     print(f"Mana: {p.mana}/{p.maxMana}", 0.3)
     print(f"Energy: {p.energy}/{p.maxEnergy}", 0.3)
     print(f"Gold: {player.gold}", 0.3)
-    print(f"Strength: {p.strength} (+{p.effective_strength-p.strength})", 0.3)
-    print(f"Dexterity: {p.dexterity} (+{p.effective_dexterity-p.dexterity})", 0.3)
-    print(f"Intelligence: {p.intelligence} (+{p.effective_intelligence-p.intelligence})", 0.3)
+    operator = "+" if p.effective_strength-p.strength >= 0 else ""
+    print(f"Strength: {p.strength} ({operator}{p.effective_strength-p.strength})", 0.3)
+    operator = "+" if p.effective_dexterity-p.dexterity >= 0 else ""
+    print(f"Dexterity: {p.dexterity} ({operator}{p.effective_dexterity-p.dexterity})", 0.3)
+    operator = "+" if p.effective_intelligence-p.intelligence >= 0 else ""
+    print(f"Intelligence: {p.intelligence} ({operator}{p.effective_intelligence-p.intelligence})", 0.3)
+    print(f"Speed: {p.speed}%", 0.3)
     f.header("", 0.5)
     
 def f_status_effects():
@@ -194,6 +200,25 @@ def f_status_effects():
     if len(player.statuses) < 1:
         print("You don't have any status effects.", 0.5)
     f.header("", 0.5)
+
+def f_travel():
+    f.header("List of Areas", 0.5)
+    for area in a.areas:
+        print(a.areas[area], 0.3)
+    f.header("", 0.3)
+    response = f.capitalize(input("Where would you like to travel to? "))
+    sleep(0.5)
+    if response in a.areas:
+        if a.areas[response].access == True:
+            if a.areas[response] is p.current_area:
+                print(f"You're already at {p.current_area.name}!", 0.5)
+            else:
+                print(f"You set out on the journey to {response}...", 3)
+                a.areas[response].travel()
+        else:
+            print(f"You don't have access to \'{response}\'! {a.areas[response].denialmessage}")
+    else:
+        print(f"Unkown response \'{response}\'.")
 
 #########################################
 #               COMMANDS                #
@@ -218,14 +243,15 @@ inventory = Command("Inventory", "Gives a list of all items in your inventory")
 stats = Command("Stats", "Prints out your characters stats")
 status_effects = Command("Status Effects", "Gives a list of all of your current status effects")
 use = Command("Use", "Use a consumable item in your inventory while out of combat")
+travel = Command("Travel", "Begin the journey to a different area")
 
 #########################################
 #             GAMEPLAY LOOP             #
 #########################################
 
 while running == True:
-    s.cure_check(player)
-    sleep(1.2)
+    b.hpcheck(player)
+    sleep(0.5)
     response = f.capitalize(input("What would you like to do? "))
     try:
         sleep(0.5)

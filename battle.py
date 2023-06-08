@@ -13,6 +13,7 @@ import statuses as s
 #########################################
 
 print = f.print_override
+sleep = f.sleep
 player = c.player
 moves_list = c.moves_list
 specials_list = c.specials_list
@@ -53,8 +54,9 @@ class Attack:
                 basic_attack(self, user, target, f"{message[0]} {self.verb} {message[1]}")
             else:
                 specials_list[self.special](user, target, message)
+            sleep(0.4)
         else:
-            print(f"{message[0]} tried to use {self.name}, but it missed!")
+            print(f"{message[0]} tried to use {self.name}, but it missed!", 0.3)
         user.health, p.mana, p.energy, target.health = f.limit([user.health, p.mana, p.energy, target.health], [user.maxHP, p.maxMana, p.maxEnergy, target.maxHP])
 
 #########################################
@@ -64,6 +66,7 @@ class Attack:
 def player_move(target): #gets a move input from the player, checks if that move exists in the players list of known moves, and performs it if so.
     while True:
         response = f.capitalize(input(f"You have {player.health}/{player.maxHP} HP and {p.mana}/{p.maxMana} Mana, what do you do? "))
+        sleep(0.5)
         if response == "Options":
             moves_list[response](player, target)
         elif response in player.moves:
@@ -73,12 +76,12 @@ def player_move(target): #gets a move input from the player, checks if that move
                     moves_list[response](player, target)
                     break
                 else:
-                    print(f"You don't have enough Mana to use that move! it requires {moves_list[response].mana} Mana!")
+                    print(f"You don't have enough Mana to use that move! it requires {moves_list[response].mana} Mana!", 0.8)
             except Exception as e:
                 moves_list[response](player, target)
                 break
         else:
-            print(f"Response \'{response}\' not recognized or unlearnt. Try \'options\' for a list of valid options.")
+            print(f"Response \'{response}\' not recognized or unlearnt. Try \'options\' for a list of valid options.", 0.7)
         player.health, p.mana, p.energy, target.health = f.limit([player.health, p.mana, p.energy, target.health], [player.maxHP, p.maxMana, p.maxEnergy, target.maxHP])
 
 def heal(target): #heals the target back to full health
@@ -88,24 +91,28 @@ def fight(target): #starts a battle between the player and an enemy
     global battling
     battling = True
     turn_count = 1
-    print(f"You begin battle with the enemy {target.name}!")
+    print(f"You begin battle with the enemy {target.name}!", 1.5)
     while True:
-        f.header(f"Battle with {target.name}: Turn {turn_count}")
+        f.header(f"Battle with {target.name}: Turn {turn_count}", 0.7)
         s.recur_statuses(player)
+        sleep(0.25)
         if hpcheck(target) == True or battling == False:
             break
         player_move(target)
+        sleep(0.5)
         if hpcheck(target) == True or battling == False:
             break
         s.recur_statuses(target)
-        print(f"The enemy {target.name} has {target.health}/{target.maxHP} HP remaining.")
+        sleep(0.25)
+        print(f"The enemy {target.name} has {target.health}/{target.maxHP} HP remaining.", 1)
         if hpcheck(target) == True or battling == False:
             break
         target.creature_attack(player)
+        sleep(1)
         if hpcheck(target) == True or battling == False:
             break
         turn_count += 1
-    f.header()
+    f.header("", 1.3)
     player.cures_list["Conclusion"] = True
     battling = False
     f.printing = False
@@ -116,20 +123,33 @@ def fight(target): #starts a battle between the player and an enemy
     heal(target)
 
 def hpcheck(target, checkup=False): #checks the hp of both the player and the target enemy, if one of their HP is at 0 then it ends the battle by returning True. Awards the target enemies xp and gold to the player if the player defeats them in combat.
+    if p.energy <= 0:
+        player.cures_list["Saturated"] = False
+        existed = False
+        for eff in player.statuses:
+            if eff[0] == s.exhaustion.name:
+                existed = True
+        if not existed:
+            s.exhaustion.apply(player, -1)
+    else:
+        player.cures_list["Saturated"] = True
     s.cure_check(player)
     s.cure_check(target)
+    player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])
     if player.health <= 0:
+        sleep(0.3)
         if battling == True:
-            print(f"You've been defeated in battle by the enemy {target.name}...")
+            print(f"You've been defeated in battle by the enemy {target.name}...", 0.7)
             player.cures_list["Defeat"] = True
             return True
-        print(f"You're too weak to carry on...")
+        print(f"You're too weak to carry on...", 0.5)
     elif target.health <= 0:
-        print(f"You defeated the enemy {target.name} in battle!")
+        sleep(1.2)
+        print(f"You defeated the enemy {target.name} in battle!", 1.5)
         gold_gain = round(random.uniform(target.gold-target.gold*0.1, target.gold+target.gold*0.1))
         player.gold += gold_gain
         player.XP += target.XP
-        print(f"You gained {gold_gain} gold and {target.XP} XP!")
+        print(f"You gained {gold_gain} gold and {target.XP} XP!", 1)
         player.cures_list["Victory"] = True
         return True
     if checkup == True:
@@ -151,10 +171,10 @@ class m_Options:
         
     def __call__(self, player, target):
         global moves_list
-        f.header("Available Actions")
+        f.header("Available Actions", 0.5)
         for i in player.moves:
-            print(player.moves[i])
-        f.header()
+            print(player.moves[i], 0.2)
+        f.header("", 0.5)
     
 class m_Flee:
     def __init__(self):
@@ -182,12 +202,13 @@ class m_Use:
         return f"{self.name}: Use a consumable item."
         
     def __call__(self, player, target):
-        p.inventory_check()
+        p.inventory_check(0.1)
         try:
             response = p.items_list[f.capitalize(input("What item do you want to use? "))]
+            sleep(0.5)
             if response.quantity >= 1:
                 if response.affect == "Damage" and target is player:
-                    print(f"You can't use a {response.name} on yourself!")
+                    print(f"You can't use a {response.name} on yourself!", 0.7)
                 elif (random.randint(0, 100) <= response.accuracy-target.evasion and target.evasion != -1) or response.accuracy == -1:
                     response.quantity -= 1
                     if response.affect != "":
@@ -196,21 +217,22 @@ class m_Use:
                         p.energy = p.energy + response.val1 if response.affect == "Energy" else p.energy
                         target.health = target.health - response.val1 if response.affect == "Damage" else target.health
                         if response.action == "Potion":
-                            print(f"You drank a {response.name}.")
+                            print(f"You drank a {response.name}.", 1)
                         else:
-                            print(f"{response.action[0]} {response.name}, {response.action[1]} {response.val1} {response.action[2]}.")
+                            print(f"{response.action[0]} {response.name}, {response.action[1]} {response.val1} {response.action[2]}.", 1.5)
                     for eff in response.effects:
                         eff_target = player if eff[2] == "user" else target
                         statuses_list[eff[0]].apply(eff_target, eff[1])
                 else:
                     response.quantity -= 1
-                    print(f"You tried to use {response.name}, but it missed!")
+                    print(f"You tried to use {response.name}, but it missed!", 1)
             else:
-                print(f"You don't have any {response.name}'s!")
+                print(f"You don't have any {response.name}'s!", 0.8)
                 if battling == True:
                     player_move(target)
         except:
-            print("Unknown response.")
+            sleep(0.5)
+            print("Unknown response.", 0.6)
             if battling == True:
                 player_move(target)
         player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])

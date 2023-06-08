@@ -49,15 +49,15 @@ def print_override(string, sleeptime=0): #replacement for the default print func
     if printing == True:
         print(string)
         if sleeping == True:
-            time.sleep(sleeptime*sleepmultiplier)
+            time.sleep(sleeptime/sleepmultiplier)
             
 def disable_sleep():
     global sleeping
     sleeping = False
     
 def sleep(sleeptime):
-    if sleeping == True:
-        time.sleep(sleeptime*sleepmultiplier)
+    if sleeping == True and printing == True:
+        time.sleep(sleeptime/sleepmultiplier)
 
 def header(string="", sleeptime=0): #this is used to print title bars to separate large portions of text such as when printing long vertical lists, used for aesthetic appeal
     braces = "[]" if len(string) > 0 else "--"

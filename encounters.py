@@ -98,3 +98,7 @@ HWE_U7 = Uneventful("You arrive at an overturned cart on the side of the road...
 HWE_U8 = Uneventful("You arrive at an overturned cart on the side of the road... upon inspection you find a lockbox full of gold coins!", 0, 6)
 HWE_U9 = Uneventful("You arrive at an overturned cart on the side of the road... upon inspection you can't gleam anything of value...")
 HWE_U10 = Uneventful("You reach the end of your trail and have to continue off road for a while.", -10)
+HWE_U11 = Uneventful("You walk along a forest trail while taking in the sound of chittering animals nearby.")
+HWE_U12 = Uneventful("You walk along a gurgling creek while listening to small fish splash in the water.")
+HWE_U13 = Uneventful("You hear a rustle of leaves from a nearby bush... but upon closer inspection it's just a bird that flies away.")
+HWE_U14 = Uneventful("The bridge you were planning on using to cross a river turned out to be destroyed, you'll have to find another way around...", -5)

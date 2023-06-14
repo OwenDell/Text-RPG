@@ -114,11 +114,11 @@ def loot(item, quantity):
 #########################################
 
 #example_weapon = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark], accuracy, critical, moves)
-empty = weapon("special", "Empty", "You don't have anything equipped in this slot.", 0, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 0, ["Punch"])
-bronze_short_sword = weapon("mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days...", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab"])
+empty = weapon("special", "Empty", "You don't have anything equipped in this slot.", 0, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Punch"])
+bronze_short_sword = weapon("mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days...", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab", "Bash"])
 spiked_club = weapon("both", "Spiked Club", "A crude wooden club with iron nails in it", 1, 0, 70, [25, 15, 20, 30, 0, 0, 0, 0, 0], -5, -10, 1.5, ["Bash"])
 iron_dagger = weapon("offhand", "Iron Dagger", "A simple iron dagger that's effective at targeting weak spots for critical blows", 2, 0, 125, [15, 15, 25, 5, 0, 0, 0, 0, 0], 10, 10, 2, ["Slash", "Stab"])
-flaming_sword = weapon("mainhand", "Flaming Sword", "An enchanted iron sword that is constantly ablaze", 4, 0, 300, [20, 30, 25, 15, 0, 25, 0, 0, 0], 5, 0, 1.5, ["Slash", "Stab"])
+flaming_sword = weapon("mainhand", "Flaming Sword", "An enchanted iron sword that is constantly ablaze", 4, 0, 300, [20, 30, 25, 15, 0, 25, 0, 0, 0], 5, 0, 1.75, ["Slash", "Stab"])
 
 #########################################
 #              INVENTORY                #

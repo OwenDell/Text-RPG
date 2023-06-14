@@ -45,18 +45,19 @@ class Attack:
             player.moves[self.name] = moves_list[self.name]
         
     def __str__(self):
-        damage_desc = f" that deals {self.damage} damage" if self.damage != -1 else ""
+        damage_desc = f" that deals {self.damage} {self.damagetype} damage" if self.damage != -1 and self.associated_weapon is not p.empty else f" that does {self.damagetype} damage"
         accuracy_desc =  f" | {self.accuracy}% Accuracy" if self.accuracy != -1 else ""
         return f"{self.name}: {self.description}{damage_desc}. [Costs {self.mana} Mana{accuracy_desc}]"
         
     def __call__(self, user, target):
         global moves_list
+        weapon = self.associated_weapon if user is player else p.empty
         message = ["You", f"the {target.name}"] if user is player else [f"The {user.name}", "You"]
-        if (random.randint(0, 100) <= self.accuracy-target.evasion and target.evasion != -1) or self.accuracy == -1:
+        if (random.randint(0, 100) <= (self.accuracy+weapon.accuracy)-target.evasion and target.evasion != -1) or self.accuracy == -1:
             if len(self.special) <= 0:
-                basic_attack(self, user, target, f"{message[0]} {self.verb} {message[1]}")
+                basic_attack(self, user, target, weapon, f"{message[0]} {self.verb} {message[1]}")
             else:
-                specials_list[self.special](user, target, message)
+                specials_list[self.special](user, target, weapon, message)
             sleep(0.4)
         else:
             print(f"{message[0]} tried to use {self.name}, but it missed!", 0.3)
@@ -248,39 +249,44 @@ class s_Execute:
     def __init__(self):
         self.name = "Execute"
         self.damage = 99999999999
+        self.damagetype = "Magic"
+        self.critchance = -1
         specials_list[self.name] = self
         
     def __str__(self):
         return f"{self.name}: Deletes the enemy from existence."
         
-    def __call__(self, user, target, message):
+    def __call__(self, user, target, weapon, message):
         global moves_list
-        basic_attack(self, user, target, f"{message[0]} deleted {message[1]} from existence")
+        basic_attack(self, user, target, weapon, f"{message[0]} deleted {message[1]} from existence")
         
 class s_Uppercut:
     def __init__(self):
         self.name = "Uppercut"
         self.damage = 50
+        self.damagetype = "Blunt"
+        self.critchance = 20
         specials_list[self.name] = self
         
     def __str__(self):
         return f"{self.name}: A powerful uppercut that deals {self.damage} damage."
         
-    def __call__(self, user, target, message):
+    def __call__(self, user, target, weapon, message):
         global moves_list
-        basic_attack(self, user, target, f"{message[0]} struck {message[1]} with a powerful uppercut to the head")
+        basic_attack(self, user, target, weapon, f"{message[0]} struck {message[1]} with a powerful uppercut to the head")
 
 class s_Bowshot: #in the future, make a separate bowshot MOVE for the player, where they choose what arrow to shoot and what effects it has.
     def __init__(self):
         self.name = "Bowshot"
         self.damage = 40
+        self.damagetype = "Pierce"
         self.accuracy = 50
         specials_list[self.name] = self
         
     def __str__(self):
         return f"{self.name}"
         
-    def __call__(self, user, target, message):
+    def __call__(self, user, target, weapon, message):
         global moves_list
         hit_chance = random.randint(0, 100)
         if hit_chance+30 <= self.accuracy-target.evasion and target.evasion != -1:
@@ -311,8 +317,9 @@ for globals_object in temp_globals:
 #########################################
 
 punch = Attack(False, "Punch", "A quick punch with your fist", 10, "Blunt", 110, 10, 0, "punched", "")
-slash = Attack(False, "Slash", "A swift slash with your weapon", 20, "Slash", 100, 15, 0, "slashed", "")
-stab = Attack(False, "Stab", "A harsh jab with your weapon", 30, "Pierce", 90, 20, 5, "stabbed", "")
+slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, "Slash", 100, 15, 0, "slashed", "")
+stab = Attack(False, "Stab", "A piercing jab with your weapon", 30, "Pierce", 85, 20, 0, "stabbed", "")
+bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, "Blunt", 95, 5, 0, "bashed", "")
 uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, "Blunt", 80, 10, 10, "delivered a devastating uppercut to", "Uppercut")
 execute = Attack(False, "Execute", "You delete the enemy from existence", -1, "Physical", -1, 0, 0, "executed", "Execute")
 claw = Attack(False, "Claw", "A painful slash with your claws", 10, "Slash", 90, 15, 0, "clawed", "")

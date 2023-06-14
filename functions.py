@@ -41,9 +41,48 @@ def limit(inputs, maxes, mins=0): #takes 1 or more values for the inputs, maxes,
     inputs = inputs[0] if len(inputs) == 1 else inputs
     return inputs
 
-def basic_attack(move, user, target, message=f"the attacker attacked"): #used for both creature and player attacks that don't have any special functions to them, and simply do damage.
-    target.health -= move.damage
-    print(f"{message}, dealing {move.damage} damage!")
+def basic_attack(move, user, target, weapon, message=f"the attacker attacked"): #used for both creature and player attacks that don't have any special functions to them, and simply do damage.
+    if weapon.name == "Empty":
+        damage = move.damage
+        if move.damagetype in target.weaknesses:
+            damage = damage*1.5
+            print(f"{move.damagetype}: Weakness! ({damage} dmg)")
+        elif move.damagetype in target.resistances:
+            damage = damage*0.5
+            print(f"{move.damagetype}: Resistance! ({damage} dmg)")
+        elif move.damagetype in target.immunities:
+            damage = damage*0
+            print(f"{move.damagetype}: Immune! ({damage} dmg)")
+        else:
+            print(f"{move.damagetype}: Standard! ({damage} dmg)")
+    else:
+        damage = 0
+        for i, dmg in enumerate(weapon.damages):
+            if i <= 3:
+                if dmg == move.damagetype:
+                    pass
+                else:
+                    continue
+            if dmg in target.weaknesses:
+                damage += weapon.damages[dmg]*1.5
+                print(f"{dmg}: Weakness! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1.5} dmg)")
+            elif dmg in target.resistances:
+                damage += weapon.damages[dmg]*0.5
+                print(f"{dmg}: Resistance! ({weapon.damages[dmg]}->{weapon.damages[dmg]*.5} dmg)")
+            elif dmg in target.immunities:
+                damage += weapon.damages[dmg]*0
+                print(f"{dmg}: Immunity! ({weapon.damages[dmg]}->{weapon.damages[dmg]*0} dmg)")
+            else:
+                damage += weapon.damages[dmg]
+                print(f"{dmg}: Standard! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1} dmg)")
+    damage = round(damage)
+    if random.randint(0, 100) <= move.critchance+weapon.critchance and move.critchance != -1:
+        damage = round(damage*weapon.critmultiplier)
+        target.health -= damage
+        print(f"{message}, dealing {damage} damage! (CRITICAL HIT)")
+    else:
+        target.health -= damage
+        print(f"{message}, dealing {damage} damage!")
 
 def print_override(string, sleeptime=0): #replacement for the default print function that adds a check to see if 'printing' is enabled, can be very convenient at times when you want functions to run in the background without them spewing out all their associated text.
     if printing == True:

@@ -12,6 +12,7 @@ print = f.print_override
 sleep = f.sleep
 items_list = {}
 equipment_list = {}
+weapons_list = {}
 health_potion_action = ["You drank a", "healing", "HP"]
 mana_potion_action = ["You drank a", "restoring", "Mana"]
 food_action = ["You ate a", "restoring", "Energy"]
@@ -61,8 +62,33 @@ class item:
         print(f"{self.name}: {self.description}. ({self.quantity} owned)")
 
 class weapon: #for equipment, store every piece of equipment in equipment_list. The player can collect duplicates of gear that is stored in quantity, make function allowing player to swap out equipment of same {slot}, which decrements the quantity value of newly equipped item by 1 and increments quantity of swapped out equipment by 1. Therefore equipped items do not show up in equipment_list to make it easier to restrict player from selling equipped gear or something like that.
-    def __init__(self, slot, name, description, tier, quantity, value):
-        pass
+    def __init__(self, slot, name, description, tier, quantity, value, damages, accuracy, critchance, critmultiplier, moves):
+        self.slot = slot #The slot for the equipment, in the case of weapons, either "mainhand", "offhand", "both", or "special". Most weapons will be equipped in either the mainhand or offhand, ones with both are either 2-hand weapons or dual wield weapons that take up both slots, and special is for special weapons that don't take up a weapon slot, maybe something like a floating magic orb idk
+        self.name = name #The name of the piece of equipment
+        self.description = description #The description, should be fairly brief and not go into statiscal detail, as that can be viewed with the equipment 'inspect' feature that gives the detailed stats
+        self.tier = tier #The tier of the equipment, used to determine where it belongs in loot pools and to give a quick and easy reference for its quality
+        self.quantity = quantity #How many the player owns, should be 0 for everything that the player doesn't start with. The player will be able to collect duplicates of equipment they already own so they can separately sell or salvage them
+        self.value = value #The baseline buy/sell value of the item. The actual buy/sell value will not be exactly this, as merchants will charge a premium for goods and will buy goods for less, but those prices will be based off this
+        self.accuracy = accuracy #The ADDITIONAL accuracy this weapon applies to moves. The baseline for this is 0, as any value other than 0 is added on to the accuracy for moves, and is not a multiplier
+        self.critchance = critchance #The ADDITIONAL crit chance this weapon applies to moves. The baseline for this is 0, as any value other than 0 is added on to the crit chance for moves, and is not a multiplier
+        self.critmultiplier = critmultiplier #The damage multiplier applied when a critical hit is performed, the baseline should be 1.5x
+        self.moves = moves #The list of moves that this weapon has. The player will have access to every move of their currently equipped weapon, and those moves will be automatically unlearnt when the player unequips the weapon
+        self.damages = { #A dictionary of the damage types this weapon does as the keys with the associated base damage value for each damage type as the value. Moves will pick one of the 3 damage physical damage types, or default to the "Physical", damage value, and then add on any of the elemental damage types. This means every weapon must either have a value for all of the first 4 damage values, and then the rest can be 0 as those will be adde don.
+            "Physical": damages[0],
+            "Slash": damages[1],
+            "Pierce": damages[2],
+            "Blunt": damages[3],
+            "Magic": damages[4],
+            "Fire": damages[5],
+            "Lightning": damages[6],
+            "Holy": damages[7],
+            "Dark": damages[8]
+        }
+        equipment_list[self.name] = self
+        weapons_list[self.name] = self
+
+    def __str__(self):
+        print(f"{self.name}: {self.description}. ({self.quantity} owned)")
 
 #########################################
 #          BACK-END FUNCTIONS           #
@@ -87,12 +113,18 @@ def loot(item, quantity):
 #              EQUIPMENT                #
 #########################################
 
-
+#example_weapon = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark], accuracy, critical, moves)
+empty = weapon("special", "Empty", "You don't have anything equipped in this slot.", 0, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 0, ["Punch"])
+bronze_short_sword = weapon("mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days...", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab"])
+spiked_club = weapon("both", "Spiked Club", "A crude wooden club with iron nails in it", 1, 0, 70, [25, 15, 20, 30, 0, 0, 0, 0, 0], -5, -10, 1.5, ["Bash"])
+iron_dagger = weapon("offhand", "Iron Dagger", "A simple iron dagger that's effective at targeting weak spots for critical blows", 2, 0, 125, [15, 15, 25, 5, 0, 0, 0, 0, 0], 10, 10, 2, ["Slash", "Stab"])
+flaming_sword = weapon("mainhand", "Flaming Sword", "An enchanted iron sword that is constantly ablaze", 4, 0, 300, [20, 30, 25, 15, 0, 25, 0, 0, 0], 5, 0, 1.5, ["Slash", "Stab"])
 
 #########################################
 #              INVENTORY                #
 #########################################
 
+#example_item = item(slot, name, description, action, tier, quantity, value, affect, val1, val2, val3, effects, accuracy)
 small_health_potion = item("consumable", "Small Health Potion", f"A small red flask that heals you for 20 HP when drank", health_potion_action, 1, 5, 10, "Health", 20, 0, 0, [], -1)
 health_potion = item("consumable", "Health Potion", f"A red bottle that heals you for 50 HP when drank", health_potion_action, 3, 0, 40, "Health", 50, 0, 0, [], -1)
 large_health_potion = item("consumable", "Large Health Potion", f"A large red draught that heals you for 100 HP when drank", health_potion_action, 7, 0, 125, "Health", 100, 0, 0, [], -1)

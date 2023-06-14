@@ -27,15 +27,18 @@ battling = False
 #########################################
 
 class Attack:
-    def __init__(self, learned, name, description, damage, accuracy, mana, verb, special):
+    def __init__(self, learned, name, description, damage, damagetype, accuracy, critchance, mana, verb, special):
         self.learned = learned
         self.name = name
         self.description = description
         self.damage = damage
+        self.damagetype = damagetype
         self.accuracy = accuracy
+        self.critchance = critchance
         self.mana = mana
         self.verb = verb
         self.special = special
+        self.associated_weapon = p.empty
         global moves_list
         moves_list[self.name] = self
         if self.learned == True:
@@ -307,11 +310,11 @@ for globals_object in temp_globals:
 #               ATTACKS                 #
 #########################################
 
-punch = Attack(True, "Punch", "A quick punch with your fist", 10, 110, 0, "punched", "")
-slash = Attack(True, "Slash", "A swift slash with your weapon", 20, 100, 0, "slashed", "")
-stab = Attack(False, "Stab", "A harsh jab with your weapon", 30, 90, 5, "stabbed", "")
-uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 80, 10, "delivered a devastating uppercut to", "Uppercut")
-execute = Attack(False, "Execute", "You delete the enemy from existence", -1, -1, 0, "executed", "Execute")
-claw = Attack(False, "Claw", "A painful slash with your claws", 10, 90, 0, "clawed", "")
-bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 85, 0, "bit", "")
-bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, -1, 0, "shot", "Bowshot")
+punch = Attack(False, "Punch", "A quick punch with your fist", 10, "Blunt", 110, 10, 0, "punched", "")
+slash = Attack(False, "Slash", "A swift slash with your weapon", 20, "Slash", 100, 15, 0, "slashed", "")
+stab = Attack(False, "Stab", "A harsh jab with your weapon", 30, "Pierce", 90, 20, 5, "stabbed", "")
+uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, "Blunt", 80, 10, 10, "delivered a devastating uppercut to", "Uppercut")
+execute = Attack(False, "Execute", "You delete the enemy from existence", -1, "Physical", -1, 0, 0, "executed", "Execute")
+claw = Attack(False, "Claw", "A painful slash with your claws", 10, "Slash", 90, 15, 0, "clawed", "")
+bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, "Pierce", 85, 10, 0, "bit", "")
+bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, "Pierce", -1, 25, 0, "shot", "Bowshot")

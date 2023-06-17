@@ -73,23 +73,22 @@ class Area:
             b.hpcheck(player)
             while (iteration%7 == 0 and abs(p.position-self.distance) > p.speed) and abs(distance_traveled) > 0:
                 print(f"You've traveled {abs(distance_traveled)}/{abs(self.distance-startpoint)}m and have {player.health}/{player.maxHP} HP and {p.energy}/{p.maxEnergy} Energy, do you want to continue onwards?", 1.5)
-                response = f.capitalize(input("Enter 'Y' or 'N' to continue onwards, or 'Use' if you'd like to use an item: "))
+                response = f.capitalize(input("Enter (1) 'Yes' or (2) 'No' to continue onwards, or (3) 'Use' if you'd like to use an item: "))
                 sleep(0.5)
-                if response == "N":
+                if response == "No" or response == "2":
                     p.position = startpoint
                     determine_area()
                     print(f"The journey proved too difficult for you, so you turned back to {p.current_area.name}...", 3)
                     break
-                elif response == "Y":
+                elif response == "Y" or response == "1":
                     print(f"You push onwards towards {self.name}, with {abs(self.distance-p.position)}m left to go.", 3)
                     break
-                elif response == "Use":
+                elif response == "Use" or response == "3":
                     c.moves_list["Use"](player, player)
                     sleep(0.3)
                 else:
-                    print("Invalid response, please enter either 'Y', 'N', or 'Use'.", 0.8)
-                    pass
-            if response == "N":
+                    print("Invalid response, please enter one of the provided options. (You can also respond with the corresponding number to quickly choose a response)", 0.8)
+            if response == "N" or response == "2":
                 break
             randomness = random.randint(0, 100)
             if randomness <= 70:
@@ -102,7 +101,7 @@ class Area:
                 b.fight(enemy)
                 print(f"After battling the {enemy.name}, you continue on your journey to {self.name}...")
             sleep(4)
-        if response != "N":
+        if response != "N" and response != "2":
             p.position = self.distance
             determine_area()
             print(f"You've arrived at {self.name}.", 1)
@@ -122,7 +121,7 @@ class a_Explore:
     
     def __call__(self, area):
         if p.energy > 10:
-            p.energy -= 10
+            p.energy -= 5
             print(area.exploring)
             sleep(3)
             area.find_encounter()

@@ -47,7 +47,7 @@ class FindItem:
     def __call__(self, area):
         potential_items = []
         for item in p.items_list:
-            if p.items_list[item].tier <= area.level and p.items_list[item].tier >= area.level-2:
+            if p.items_list[item].tier <= area.level and p.items_list[item].tier >= area.level-2 and p.items_list[item].slot == "Consumables":
                 potential_items.append(item)
         chosen_item = random.choice(potential_items)
         print(f"While exploring, you happened across a {chosen_item}!", 0.7)
@@ -102,9 +102,9 @@ HWE_U11 = Uneventful("You walk along a forest trail while taking in the sound of
 HWE_U12 = Uneventful("You walk along a gurgling creek while listening to small fish splash in the water.")
 HWE_U13 = Uneventful("You hear a rustle of leaves from a nearby bush... but upon closer inspection it's just a bird that flies away.")
 HWE_U14 = Uneventful("The bridge you were planning on using to cross a river turned out to be destroyed, you'll have to find another way around...", -5)
-HWE_U15 = Uneventful("You meet a friendly farmer who agrees to let you ride on the back of his cart for a while until you split paths", 10)
-HWE_U16 = Uneventful("You try to climb up a boulder to get a good view of your surroundings, but you fall and bruise your knee", -5, 0, -10)
-HWE_U17 = Uneventful("You try to climb up a boulder to get a good view of your surroundings, and from your vantage point you spot a shortcut in the thicket", 5)
-HWE_U18 = Uneventful("On your travels you meet an old, friendly herbalist who gives you some yarrow to chew on", 0, 0, 5)
-HWE_U19 = Uneventful("Your journey takes you through a small clearing in the woods, with light shining through the treeline onto you")
-HWE_U20 = Uneventful("Your journey takes you to a small pond, where you briefly stop to catch your breath before carrying on")
+HWE_U15 = Uneventful("You meet a friendly farmer who agrees to let you ride on the back of his cart for a while until you split paths.", 10)
+HWE_U16 = Uneventful("You try to climb up a boulder to get a good view of your surroundings, but you fall and bruise your knee.", -5, 0, -10)
+HWE_U17 = Uneventful("You try to climb up a boulder to get a good view of your surroundings, and from your vantage point you spot a shortcut in the thicket.", 5)
+HWE_U18 = Uneventful("On your travels you meet an old, friendly herbalist who gives you some yarrow to chew on.", 0, 0, 5)
+HWE_U19 = Uneventful("Your journey takes you through a small clearing in the woods, with light shining through the treeline onto you.")
+HWE_U20 = Uneventful("Your journey takes you to a small pond, where you briefly stop to catch your breath before carrying on.")

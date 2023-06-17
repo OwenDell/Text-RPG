@@ -46,15 +46,16 @@ def basic_attack(move, user, target, weapon, message=f"the attacker attacked"): 
         damage = move.damage
         if move.damagetype in target.weaknesses:
             damage = damage*1.5
-            print(f"{move.damagetype}: Weakness! ({damage} dmg)")
+            #print(f"{move.damagetype}: Weakness! ({damage} dmg)")
         elif move.damagetype in target.resistances:
             damage = damage*0.5
-            print(f"{move.damagetype}: Resistance! ({damage} dmg)")
+            #print(f"{move.damagetype}: Resistance! ({damage} dmg)")
         elif move.damagetype in target.immunities:
             damage = damage*0
-            print(f"{move.damagetype}: Immune! ({damage} dmg)")
+            #print(f"{move.damagetype}: Immune! ({damage} dmg)")
         else:
-            print(f"{move.damagetype}: Standard! ({damage} dmg)")
+            #print(f"{move.damagetype}: Standard! ({damage} dmg)")
+            pass
     else:
         damage = 0
         for i, dmg in enumerate(weapon.damages):
@@ -65,16 +66,16 @@ def basic_attack(move, user, target, weapon, message=f"the attacker attacked"): 
                     continue
             if dmg in target.weaknesses:
                 damage += weapon.damages[dmg]*1.5
-                print(f"{dmg}: Weakness! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1.5} dmg)")
+                #print(f"{dmg}: Weakness! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1.5} dmg)")
             elif dmg in target.resistances:
                 damage += weapon.damages[dmg]*0.5
-                print(f"{dmg}: Resistance! ({weapon.damages[dmg]}->{weapon.damages[dmg]*.5} dmg)")
+                #print(f"{dmg}: Resistance! ({weapon.damages[dmg]}->{weapon.damages[dmg]*.5} dmg)")
             elif dmg in target.immunities:
                 damage += weapon.damages[dmg]*0
-                print(f"{dmg}: Immunity! ({weapon.damages[dmg]}->{weapon.damages[dmg]*0} dmg)")
+                #print(f"{dmg}: Immunity! ({weapon.damages[dmg]}->{weapon.damages[dmg]*0} dmg)")
             else:
                 damage += weapon.damages[dmg]
-                print(f"{dmg}: Standard! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1} dmg)")
+                #print(f"{dmg}: Standard! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1} dmg)")
     damage = round(damage)
     if random.randint(0, 100) <= move.critchance+weapon.critchance and move.critchance != -1:
         damage = round(damage*weapon.critmultiplier)
@@ -101,4 +102,8 @@ def sleep(sleeptime):
 def header(string="", sleeptime=0): #this is used to print title bars to separate large portions of text such as when printing long vertical lists, used for aesthetic appeal
     braces = "[]" if len(string) > 0 else "--"
     side_dashes = ["-"] * (24-round(len(string)/2))
+    if string != "":
+        print_override("")
     print_override("".join(side_dashes) + braces[0] + string + braces[1] + "".join(side_dashes), sleeptime)
+    if string == "":
+        print_override("")

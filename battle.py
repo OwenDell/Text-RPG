@@ -27,7 +27,7 @@ battling = False
 #########################################
 
 class Attack:
-    def __init__(self, learned, name, description, damage, damagetype, accuracy, critchance, mana, verb, special):
+    def __init__(self, learned, name, description, damage, damagetype, accuracy, critchance, mana, energy, verb, special):
         self.learned = learned
         self.name = name
         self.description = description
@@ -36,6 +36,7 @@ class Attack:
         self.accuracy = accuracy
         self.critchance = critchance
         self.mana = mana
+        self.energy = energy
         self.verb = verb
         self.special = special
         self.associated_weapon = p.empty
@@ -45,9 +46,9 @@ class Attack:
             player.moves[self.name] = moves_list[self.name]
         
     def __str__(self):
-        damage_desc = f" that deals {self.damage} {self.damagetype} damage" if self.damage != -1 and self.associated_weapon is not p.empty else f" that does {self.damagetype} damage"
+        damage_desc = f"that deals {self.damage} {self.damagetype} damage" if self.damage != -1 and self.associated_weapon is p.empty else f"that does {self.damagetype} damage"
         accuracy_desc =  f" | {self.accuracy}% Accuracy" if self.accuracy != -1 else ""
-        return f"{self.name}: {self.description}{damage_desc}. [Costs {self.mana} Mana{accuracy_desc}]"
+        return f"{self.name}: {self.description} {damage_desc}. [{self.critchance}% Critical Chance{accuracy_desc}] (Costs {self.mana} Mana & {self.energy} Energy)"
         
     def __call__(self, user, target):
         global moves_list
@@ -76,11 +77,15 @@ def player_move(target): #gets a move input from the player, checks if that move
         elif response in player.moves:
             try:
                 if moves_list[response].mana <= p.mana:
-                    p.mana -= moves_list[response].mana
-                    moves_list[response](player, target)
-                    break
+                    if moves_list[response].energy <= p.energy:
+                        p.energy -= moves_list[response].energy
+                        p.mana -= moves_list[response].mana
+                        moves_list[response](player, target)
+                        break
+                    else:
+                        print(f"You don't have enough Energy to use that move! it requires {moves_list[response].energy} Energy!", 1)
                 else:
-                    print(f"You don't have enough Mana to use that move! it requires {moves_list[response].mana} Mana!", 0.8)
+                    print(f"You don't have enough Mana to use that move! it requires {moves_list[response].mana} Mana!", 1)
             except Exception as e:
                 moves_list[response](player, target)
                 break
@@ -159,6 +164,43 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
     if checkup == True:
         print(f"HP of {target.name}: {target.health}/{target.maxHP}")
 
+def equipment_swap(slot, equipment):
+    if slot == "Mainhand" or slot == "Offhand" or slot == "Special":
+        for attack in moves_list:
+            try:
+                if moves_list[attack].associated_weapon == p.equipment_list[p.equipment[slot]]:
+                    if attack in p.equipment_list[p.equipment["Mainhand"]].moves and slot != "Mainhand":
+                        moves_list[attack].associated_weapon = p.equipment_list[p.equipment["Mainhand"]]
+                    elif attack in p.equipment_list[p.equipment["Offhand"]].moves and slot != "Offhand":
+                        moves_list[attack].associated_weapon = p.equipment_list[p.equipment["Offhand"]]
+                    elif attack in p.equipment_list[p.equipment["Special"]].moves and slot != "Special":
+                        moves_list[attack].associated_weapon = p.equipment_list[p.equipment["Special"]]
+                    else:
+                        moves_list[attack].associated_weapon = p.empty
+                        if moves_list[attack].learned != True:
+                            player.moves.pop(attack)
+            except:
+                pass
+        for attack in p.equipment_list[equipment].moves:
+            if moves_list[attack].associated_weapon is p.empty or moves_list[attack].associated_weapon.name == equipment:
+                moves_list[attack].associated_weapon = p.equipment_list[equipment]
+                player.moves[attack] = moves_list[attack]
+            else:
+                print(f"{p.equipment_list[equipment].name} has the move {moves_list[attack].name}, however that move is already bound to {moves_list[attack].associated_weapon.name}, would you like to rebind it to {p.equipment_list[equipment].name}?", 1.5)
+                while True:
+                    response = f.capitalize(input(f"Enter either (1) 'Yes' to rebind the move to {p.equipment_list[equipment].name}, or (2) 'No' to leave it as it is: "))
+                    sleep(0.5)
+                    if response == "Yes" or response == "1":
+                        print(f"{moves_list[attack].name} has been rebound to {p.equipment_list[equipment].name}.", 0.8)
+                        moves_list[attack].associated_weapon = p.equipment_list[equipment]
+                        break
+                    elif response == "No" or response == "2":
+                        print(f"{moves_list[attack].name} will remain bound to {moves_list[attack].associated_weapon.name}.", 0.8)
+                        break
+                    else:
+                        print("Invalid response, please enter one of the provided options. (You can also respond with the corresponding number to quickly choose a response)", 1)
+    p.equipment[slot] = equipment
+
 #########################################
 #                 MOVES                 #
 #########################################
@@ -206,9 +248,9 @@ class m_Use:
         return f"{self.name}: Use a consumable item."
         
     def __call__(self, player, target):
-        p.inventory_check(0.1)
+        p.inventory_check(0.1, "Consumables")
         try:
-            response = p.items_list[f.capitalize(input("What item do you want to use? "))]
+            response = p.consumables_list[f.capitalize(input("What item do you want to use? "))]
             sleep(0.5)
             if response.quantity >= 1:
                 if response.affect == "Damage" and target is player:
@@ -316,12 +358,12 @@ for globals_object in temp_globals:
 #               ATTACKS                 #
 #########################################
 
-punch = Attack(False, "Punch", "A quick punch with your fist", 10, "Blunt", 110, 10, 0, "punched", "")
-slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, "Slash", 100, 15, 0, "slashed", "")
-stab = Attack(False, "Stab", "A piercing jab with your weapon", 30, "Pierce", 85, 20, 0, "stabbed", "")
-bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, "Blunt", 95, 5, 0, "bashed", "")
-uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, "Blunt", 80, 10, 10, "delivered a devastating uppercut to", "Uppercut")
-execute = Attack(False, "Execute", "You delete the enemy from existence", -1, "Physical", -1, 0, 0, "executed", "Execute")
-claw = Attack(False, "Claw", "A painful slash with your claws", 10, "Slash", 90, 15, 0, "clawed", "")
-bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, "Pierce", 85, 10, 0, "bit", "")
-bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, "Pierce", -1, 25, 0, "shot", "Bowshot")
+punch = Attack(True, "Punch", "A quick punch with your fist", 10, "Blunt", 110, 10, 0, 0, "punched", "")
+slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, "Slash", 100, 15, 0, 0, "slashed", "")
+stab = Attack(False, "Stab", "A piercing jab with your weapon", 30, "Pierce", 85, 20, 0, 0, "stabbed", "")
+bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, "Blunt", 95, 5, 0, 0, "bashed", "")
+uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, "Blunt", 80, 10, 10, 0, "delivered a devastating uppercut to", "Uppercut")
+execute = Attack(False, "Execute", "You delete the enemy from existence", -1, "Physical", -1, 0, 0, 0, "executed", "Execute")
+claw = Attack(False, "Claw", "A painful slash with your claws", 10, "Slash", 90, 15, 0, 0, "clawed", "")
+bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, "Pierce", 85, 10, 0, 0, "bit", "")
+bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, "Pierce", -1, 25, 0, 10, "shot", "Bowshot")

@@ -192,7 +192,106 @@ def f_stats():
     print(f"Intelligence: {p.intelligence} ({operator}{p.effective_intelligence-p.intelligence})", 0.3)
     print(f"Speed: {p.speed}%", 0.3)
     f.header("", 0.5)
+
+def f_equipment():
+    f.header("Currently Equipped Gear", 0.5)
+    for equipped in p.equipment:
+        print(f"{f.capitalize(equipped)}: {p.equipment[equipped]}", 0.3)
+    f.header("", 0.5)
+    while True:
+        print("Would you like to Inspect a piece of equipment, Swap out your equipment, or Exit?", 1)
+        response = f.capitalize(input("Enter either (1) 'Inspect' (2) 'Swap' or (3) 'Exit': "))
+        sleep(0.5)
+        if response == "Inspect" or response == "1":
+            try:
+                response = p.equipment_list[f.capitalize(input("What piece of equipment would you like to inspect? "))]
+                sleep(0.5)
+                f.header(response.name, 0.7)
+                print(f"\n{response}\n", 1)
+                print(f"Equipment Slot: {f.capitalize(response.slot)}", 0.3)
+                print(f"Tier: {response.tier}", 0.3)
+                print(f"# in Inventory: {response.quantity}", 0.3)
+                print(f"Estimated Value: {response.value}", 0.3)
+                print(f"Accuracy Bonus: {response.accuracy}%", 0.3)
+                print(f"Crit Chance Bonus: {response.critchance}%", 0.3)
+                print(f"Crit Damage Multiplier: {response.critmultiplier*100}%", 0.3)
+                print(f"\nDamage Types:\n", 1)
+                for dmg in response.damages:
+                    print(f"{dmg}: {response.damages[dmg]}", 0.3)
+                print(f"\nWeapon Moves:\n", 1)
+                for move in response.moves:
+                    print(moves_list[move], 0.3)
+                print("")
+                f.header("", 0.5)
+            except:
+                print("Invalid response, your response must be the name of a piece of equipment.", 1)
+        elif response == "Swap" or response == "2":
+            try:
+                print("What piece of equipment would you like to swap out?", 0.8)
+                response = f.capitalize(input("Enter either the name of the piece of equipment or the name of the equipment slot you want to swap out: "))
+                sleep(0.5)
+                if response in p.equipment.keys():
+                    pass
+                elif p.equipment_list[response].slot == "Both":
+                    response = "Mainhand"
+                else:
+                    response = p.equipment_list[response].slot
+                p.inventory_check(0.15, response)
+                response2 = f.capitalize(input("What do you want to swap it out with? (or enter 'Unequip' to unequip the item and move it to your inventory) "))
+                sleep(0.5)
+                try:
+                    if response2 == "Unequip":
+                        if p.equipment_list[p.equipment[response]].name == "Empty" or p.equipment_list[p.equipment[response]].name == "None":
+                            print(f"You don't have anything equipped in your {response} slot.", 1)
+                        else:
+                            print(f"You unequipped your {p.equipment_list[p.equipment[response]].name} and moved it to your inventory.", 1.5)
+                            p.equipment_list[p.equipment[response]].quantity += 1
+                            if response == "Mainhand" or response == "Offhand" or response == "Special":
+                                if p.equipment_list[p.equipment[response]].slot == "Both":
+                                    b.equipment_swap("Mainhand", "Empty")
+                                    b.equipment_swap("Offhand", "Empty")
+                                else:
+                                    b.equipment_swap(response, "Empty")
+                            else:
+                                b.equipment_swap(response, "None")
+                    elif p.equipment_list[response2].quantity < 1:
+                        print(f"You need at least 1 {p.equipment_list[response2].name} in your inventory to equip it.", 1)
+                    elif p.equipment_list[response2].slot == response:
+                        if p.equipment_list[p.equipment[response]].name != "Empty" and p.equipment_list[p.equipment[response]].name != "None":
+                            print(f"You swapped out your {p.equipment[response]} for {p.equipment_list[response2].name}!", 1.5)
+                            p.equipment_list[p.equipment[response]].quantity += 1
+                        else:
+                            print(f"You equipped a {p.equipment_list[response2].name}!", 1.5)
+                        p.equipment_list[response2].quantity -= 1
+                        if p.equipment_list[p.equipment[response]].slot == "Both" and response == "Mainhand":
+                            b.equipment_swap("Offhand", "Empty")
+                        if p.equipment_list[p.equipment[response]].slot == "Both" and response == "Offhand":
+                            b.equipment_swap("Mainhand", "Empty")
+                        b.equipment_swap(response, response2)
+                    elif p.equipment_list[response2].slot == "Both" and (response == "Mainhand" or response == "Offhand"):
+                        print(f"You equipped a {p.equipment_list[response2].name} in both your Mainhand and Offhand slots!", 1.5)
+                        p.equipment_list[p.equipment["Mainhand"]].quantity = p.equipment_list[p.equipment["Mainhand"]].quantity + 1 if p.equipment_list[p.equipment["Mainhand"]].name != "Empty" else p.equipment_list[p.equipment["Mainhand"]].quantity
+                        p.equipment_list[p.equipment["Offhand"]].quantity = p.equipment_list[p.equipment["Offhand"]].quantity + 1 if p.equipment_list[p.equipment["Offhand"]].name != "Empty" else p.equipment_list[p.equipment["Offhand"]].quantity
+                        p.equipment_list[response2].quantity -= 1
+                        b.equipment_swap("Mainhand", response2)
+                        b.equipment_swap("Offhand", response2)
+                    else:
+                        print(f"That's the wrong slot for that item! The correct slot for {p.equipment_list[response2].name} is {p.equipment_list[response2].slot}.", 1)
+                except Exception as e:
+                    print("Invalid response, your response must be the name of a piece of equipment in your inventory.", 1)
+            except:
+                print("Invalid response, your response must be the name of a piece of currently equipped equipment.", 1)
+        elif response == "Exit" or response == "3":
+            break
+        else:
+            print("Invalid response, please enter one of the provided options. (You can also respond with the corresponding number to quickly choose a response)", 1)
     
+def f_moves():
+    f.header("Available Moves", 0.5)
+    for i in player.moves:
+        print(player.moves[i], 0.2)
+    f.header("", 0.5)
+
 def f_status_effects():
     f.header("Status Effects", 0.5)
     for item in player.statuses:
@@ -240,7 +339,9 @@ devcmds = Command("Devcmds", "Enter a developer command")
 settings = Command("Settings", "View and change the game settings")
 commands = Command("Commands", "Gives a list of all valid commands")
 inventory = Command("Inventory", "Gives a list of all items in your inventory")
+equipment = Command("Equipment", "Lets you inspect and change your equipment")
 stats = Command("Stats", "Prints out your characters stats")
+moves = Command("Moves", "Gives a list of all available moves in combat")
 status_effects = Command("Status Effects", "Gives a list of all of your current status effects")
 use = Command("Use", "Use a consumable item in your inventory while out of combat")
 travel = Command("Travel", "Begin the journey to a different area")

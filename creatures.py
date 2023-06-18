@@ -44,6 +44,17 @@ class Creature:
             "Lesser Antidote": False,
             "Antidote": False
         }
+        self.damage_affinities = {
+            "Physical": 1,
+            "Slash": 1,
+            "Pierce": 1,
+            "Blunt": 1,
+            "Magic": 1,
+            "Fire": 1,
+            "Lightning": 1,
+            "Holy": 1,
+            "Dark": 1
+        }
         enemies.append(self)
     
     def __str__(self):

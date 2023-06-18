@@ -10,6 +10,7 @@ import creatures as c
 import encounters as e
 import battle as b
 import statuses as s
+import npc as n
 
 #########################################
 #           GLOBAL VARIABLES            #
@@ -120,7 +121,7 @@ class a_Explore:
         return f"{self.name}: Explore around in your current area to find treasure, foes, and special encounters."
     
     def __call__(self, area):
-        if p.energy > 10:
+        if p.energy >= 5:
             p.energy -= 5
             print(area.exploring)
             sleep(3)
@@ -129,11 +130,34 @@ class a_Explore:
         else:
             print("You don't have enough energy to do that!")
 
+class a_Shop:
+    def __init__(self):
+        self.name = "Shop"
+        activities_list[self.name] = self
+
+    def __str__(self):
+        return f"{self.name}: Visit one of the shopkeepers in the area to buy or sell goods at."
+    
+    def __call__(self, area):
+        f.header("Available Shopkeepers", 0.5)
+        for shopkeeper in n.shopkeeper_list:
+            if area.name in n.shopkeeper_list[shopkeeper].locations:
+                print(n.shopkeeper_list[shopkeeper], 0.3)
+        f.header("", 0.5)
+        response = f.capitalize(input("What shopkeeper do you want to visit? "))
+        sleep(0.5)
+        if response in n.shopkeeper_list:
+            print(f"You walk through the streets of {area.name} to get to {response}...", 2)
+            n.converse(response)
+        else:
+            print("Invalid response, your response must be the name of a listed shopkeeper.", 1)
+        print(f"You make your way back to the center of {area.name}...", 2)
+
 #########################################
 #                 AREAS                 #
 #########################################
 
-chalgos = Area("Chalgos", "A small, peaceful town in the middle of the Gavlynn Forest", "", "Settlement", 1, 0, k_start, "The guards are barring you from entering the town.", [], [], [], [[c.goblin, 100]])
+chalgos = Area("Chalgos", "A small, peaceful town in the middle of the Gavlynn Forest", "", "Settlement", 1, 0, k_start, "The guards are barring you from entering the town.", ["Shop"], [], [], [[c.goblin, 100]])
 gavlynn_forest = Area("Gavlynn Forest", "A dark, dense forest... venturing far from the trail is dangerous here...", "You begin venturing off the beaten path and into the dense foliage...", "Field", 1, 300, k_start, "You're not yet ready to venture outside the safety of the town.", ["Explore"], [[e.Enemy(), 55], [e.GoldPouch(), 20], [e.FindItem(), 25]], [[c.goblin, 50], [c.wolf, 30], [c.skeleton_archer, 20], [c.elusive_ghost, 10]], [[c.wolf, 50], [c.goblin, 20], [c.bandit, 80]])
 farlands = Area("Farlands", "A very far away place", "You begin venturing off the beaten path and into the dense foliage...", "Field", 1, 1700, k_start, "You're not yet ready to venture outside the safety of the town.", ["Explore"], [[e.Enemy(), 55], [e.GoldPouch(), 20], [e.FindItem(), 25]], [[c.goblin, 50], [c.wolf, 30], [c.skeleton_archer, 20], [c.elusive_ghost, 10]], [[c.wwe_champ, 50], [c.elusive_ghost, 20]])
 

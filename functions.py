@@ -45,16 +45,17 @@ def basic_attack(move, user, target, weapon, message=f"the attacker attacked"): 
     if weapon.name == "Empty":
         damage = move.damage
         if move.damagetype in target.weaknesses:
-            damage = damage*1.5
+            damage = damage*1.5*user.damage_affinities[move.damagetype]
             #print(f"{move.damagetype}: Weakness! ({damage} dmg)")
         elif move.damagetype in target.resistances:
-            damage = damage*0.5
+            damage = damage*0.5*user.damage_affinities[move.damagetype]
             #print(f"{move.damagetype}: Resistance! ({damage} dmg)")
         elif move.damagetype in target.immunities:
-            damage = damage*0
+            damage = damage*0*user.damage_affinities[move.damagetype]
             #print(f"{move.damagetype}: Immune! ({damage} dmg)")
         else:
             #print(f"{move.damagetype}: Standard! ({damage} dmg)")
+            damage = damage*1*user.damage_affinities[move.damagetype]
             pass
     else:
         damage = 0
@@ -65,16 +66,16 @@ def basic_attack(move, user, target, weapon, message=f"the attacker attacked"): 
                 else:
                     continue
             if dmg in target.weaknesses:
-                damage += weapon.damages[dmg]*1.5
+                damage += weapon.damages[dmg]*1.5*user.damage_affinities[dmg]
                 #print(f"{dmg}: Weakness! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1.5} dmg)")
             elif dmg in target.resistances:
-                damage += weapon.damages[dmg]*0.5
+                damage += weapon.damages[dmg]*0.5*user.damage_affinities[dmg]
                 #print(f"{dmg}: Resistance! ({weapon.damages[dmg]}->{weapon.damages[dmg]*.5} dmg)")
             elif dmg in target.immunities:
-                damage += weapon.damages[dmg]*0
+                damage += weapon.damages[dmg]*0*user.damage_affinities[dmg]
                 #print(f"{dmg}: Immunity! ({weapon.damages[dmg]}->{weapon.damages[dmg]*0} dmg)")
             else:
-                damage += weapon.damages[dmg]
+                damage += weapon.damages[dmg]*1*user.damage_affinities[dmg]
                 #print(f"{dmg}: Standard! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1} dmg)")
     damage = round(damage)
     if random.randint(0, 100) <= move.critchance+weapon.critchance and move.critchance != -1:

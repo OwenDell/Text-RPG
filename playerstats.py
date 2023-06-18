@@ -14,6 +14,9 @@ items_list = {}
 consumables_list = {}
 equipment_list = {}
 weapons_list = {}
+armor_list = {}
+keyitems_list = {}
+materials_list = {}
 health_potion_action = ["You drank a", "healing", "HP"]
 mana_potion_action = ["You drank a", "restoring", "Mana"]
 food_action = ["You ate a", "restoring", "Energy"]
@@ -23,6 +26,7 @@ damage_action = ["You used a", "dealing", "damage"]
 #                STATS                  #
 #########################################
 
+player_name = "Nick"
 current_area = "Chalgos"
 position = 0
 mana = 20 
@@ -131,7 +135,7 @@ def loot(item, quantity=1):
 #########################################
 
 #example_weapon = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark], accuracy, critchance, critmultiplier, moves)
-empty = weapon("Special", "Empty", "You don't have anything equipped in this slot", 0, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, [])
+empty = weapon("Special", "Empty", "You don't have anything equipped in this slot", -1, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, [])
 bronze_short_sword = weapon("Mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days..", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab"])
 spiked_club = weapon("Both", "Spiked Club", "A crude wooden club with iron nails in it", 1, 0, 70, [25, 15, 20, 30, 0, 0, 0, 0, 0], -5, -10, 1.5, ["Bash"])
 iron_dagger = weapon("Offhand", "Iron Dagger", "A simple iron dagger that's effective at targeting weak spots for critical blows", 2, 0, 125, [15, 15, 25, 5, 0, 0, 0, 0, 0], 10, 10, 2, ["Slash", "Stab"])
@@ -151,7 +155,8 @@ large_mana_potion = item("Consumables", "Large Mana Potion", f"A large blue drau
 bread_chunk = item("Consumables", "Chunk Of Bread", "A stale yet hearty chunk of bread. Restores 25 Energy when consumed", food_action, 1, 3, 8, "Energy", 25, 0, 0, [], -1)
 bread_loaf = item("Consumables", "Loaf Of Bread", "A nutritious loaf of bread. Restores 60 Energy when consumed", food_action, 2, 1, 15, "Energy", 60, 0, 0, [], -1)
 hearty_stew = item("Consumables", "Hearty Stew", "A warm bowl of stew that restores 75 Energy and grants the 'Well Fed' buff for the next 5 encounters", food_action, 3, 0, 40, "Energy", 75, 0, 0, [["Well Fed", 5, "user"]], -1)
-poisoned_throwing_knife = item("Consumables", "Poison Throwing Knife", "A throwing knife that deals 25 Damage and inflicts a minor poison", damage_action, 4, 0, 20, "Damage", 25, 0, 0, [["Lesser Poison", 3, "target"]], 80)
+throwing_knife = item("Consumables", "Throwing Knife", "A throwing knife that deals 25 Damage", damage_action, 2, 0, 10, "Damage", 25, 0, 0, [], 85)
+poisoned_throwing_knife = item("Consumables", "Poison Throwing Knife", "A throwing knife that deals 20 Damage and inflicts a minor poison", damage_action, 4, 0, 25, "Damage", 20, 0, 0, [["Lesser Poison", 3, "target"]], 80)
 lesser_antidote = item("Consumables", "Lesser Antidote", "Cures you of minor poisons and ailments", "Potion", 3, 0, 25, "Potion", 0, 0, 0, [["Lesser Antidote", 0, "user"]], -1)
 antidote = item("Consumables", "Antidote", "Makes you immune to common poisons and ailments for 5 turns", "Potion", 6, 0, 70, "Potion", 0, 0, 0, [["Lesser Antidote", 5, "user"], ["Antidote", 5, "user"]], -1)
 poison_vial = item("Consumables", "Poison Vial", "Afflicts the drinker with a minor poison for 5 turns", "Potion", -5, 0, 30, "Potion", 0, 0, 0, [["Lesser Poison", 5, "user"]], -1)

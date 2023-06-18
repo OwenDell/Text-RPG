@@ -12,6 +12,7 @@ import areas as a
 import encounters as e
 import battle as b
 import statuses as s
+import npc as n
 
 #########################################
 #           GLOBAL VARIABLES            #
@@ -103,13 +104,18 @@ def teleport(area):
     except:
         print(f"Invalid area name \'{f.capitalize(area)}\'", 0.3)
 
-def devmode(allitems=False, allmoves=False):
+def set_rep(npc, rep):
+    n.npc_list[npc].relation = rep
+
+def devmode(allitems=False, allmoves=False, gold=False):
     if allitems != False and allitems != "False":
         for item in p.items_list:
             loot(item, 999)
     if allmoves != False and allmoves != "False":
         for move in c.moves_list:
             learn_move(move)
+    if gold != False and gold != "False":
+        player.gold += 9999999
 
 #########################################
 #          FRONT-END FUNCTIONS          #
@@ -194,11 +200,11 @@ def f_stats():
     f.header("", 0.5)
 
 def f_equipment():
-    f.header("Currently Equipped Gear", 0.5)
-    for equipped in p.equipment:
-        print(f"{f.capitalize(equipped)}: {p.equipment[equipped]}", 0.3)
-    f.header("", 0.5)
     while True:
+        f.header("Currently Equipped Gear", 0.5)
+        for equipped in p.equipment:
+            print(f"{f.capitalize(equipped)}: {p.equipment[equipped]}", 0.2)
+        f.header("", 0.5)
         print("Would you like to Inspect a piece of equipment, Swap out your equipment, or Exit?", 1)
         response = f.capitalize(input("Enter either (1) 'Inspect' (2) 'Swap' or (3) 'Exit': "))
         sleep(0.5)
@@ -222,7 +228,7 @@ def f_equipment():
                 for move in response.moves:
                     print(moves_list[move], 0.3)
                 print("")
-                f.header("", 0.5)
+                f.header("", 1.5)
             except:
                 print("Invalid response, your response must be the name of a piece of equipment.", 1)
         elif response == "Swap" or response == "2":
@@ -361,7 +367,6 @@ while running == True:
         else:
             commands_list[response]()
     except:
-        sleep(0)
         print(f"Response \'{response}\' not recognized. Try \'Commands\' for a list of valid options.")
         
 print("Game has ended.")

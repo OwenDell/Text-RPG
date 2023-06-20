@@ -22,7 +22,7 @@ player = c.player
 #              ENCOUNTERS               #
 #########################################
 
-class Enemy:
+class Enemy: #The player encounters a random enemy from the pool of potential enemies within their current area. Each enemy has an associated weight for how likely it is the player encounters them.
     def __init__(self):
         self.name = "FindEnemy"
 
@@ -31,7 +31,7 @@ class Enemy:
         print(enemy.intro, 3)
         b.fight(enemy)
 
-class GoldPouch:
+class GoldPouch: #The player finds a pouch of gold, where the amount of gold within is a random value based on the level of the current area.
     def __init__(self):
         self.name = "GoldPouch"
 
@@ -40,7 +40,7 @@ class GoldPouch:
         print(f"You found a pouch of gold on the side of the trail containing {gold} coins!")
         player.gold += gold
 
-class FindItem:
+class FindItem: #The player finds a random consumable item within the area. The items available to be found is based on the items tier, where the player can find items up to 2 tiers lower than their current areas level and up to 1 tier higher. Each item has an associated rarity for how likely it is to find that item.
     def __init__(self):
         self.name = "FindItem"
 
@@ -57,8 +57,8 @@ class FindItem:
 #          HIGHWAY ENCOUNTERS           #
 #########################################
 
-highway_encounters_uneventful = []
-highway_encounters_event = [[FindItem(), 35], [GoldPouch(), 65]]
+highway_encounters_uneventful = [] #List of uneventful highway encounters, which are just simple ones where a line is printed and a simple consequence potentially plays out such as losing/gaining a small amount of HP, gold, or Energy
+highway_encounters_event = [[FindItem(), 35], [GoldPouch(), 65]] #List of eventful highway encounters, which are ones you'd expect to find while exploring
 
 class Uneventful:
     def __init__(self, text, energy=0, gold=0, health=0):

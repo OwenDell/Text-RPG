@@ -18,8 +18,8 @@ player = c.player
 moves_list = c.moves_list
 specials_list = c.specials_list
 statuses_list = {} #Statuses are the full status effect with its own systems for application, recovery, and recurring impacts. They use effects, which are the back-end functions that actually do things.
-effects_list = {} #Empty dictionary of all effects waiting to be filled during initialization
-operators = {
+effects_list = {} #Empty dictionary of all effects waiting to be filled during initialization.
+operators = { #Used with the standard effects class for modularity purposes.
     '+': operator.add,
     '-': operator.sub,
     '*': operator.mul
@@ -29,29 +29,29 @@ operators = {
 #               CLASSES                 #
 #########################################
 
-class Status:
+class Status: #Class for statuses, which are what control effects. Statuses do most of the logic and front-end parts of the system, whereas effects are what actually happens to the target. Multiple effects will usually be associated with a status.
     def __init__(self, name, description, application_list, recurring_list, recovery_list, cured_list, cures):
-        self.name = name
-        self.description = description
-        self.application_list = application_list
-        self.recurring_list = recurring_list
-        self.recovery_list = recovery_list
-        self.cured_list = cured_list
-        self.cures = cures
-        self.duration = 0
+        self.name = name #name of the status.
+        self.description = description #description of the status.
+        self.application_list = application_list #List of effects that will occur when this status is first applied.
+        self.recurring_list = recurring_list #List of effects that will occur every turn.
+        self.recovery_list = recovery_list #List of effects that will occur when the status duration ends.
+        self.cured_list = cured_list #List of effects that will occur when the target is cured of the status prematurely, mostly used for reverting any stat changes back to original.
+        self.cures = cures #List of possible cures that would cure the target of this status if triggered.
+        self.duration = 0 #The number of turns remaining on this status effect, only used for informing the player the remaining number of turns. The actual duration used for computational purposes is tied to each instance of the status in the creatures statuses list.
         statuses_list[self.name] = self
     
     def __str__(self):
         return f"{self.name}: {self.description}. [{self.duration} turns remaining]"
     
-    def recover(self, target, index):
+    def recover(self, target, index): #Called when the duration of the status reaches 0. Applies any recovery effects
         message = "Your" if target is player else f"The {target.name}'s"
         for recovery in self.recovery_list:
             effects_list[recovery](target)
         print(f"{message} {self.name} effect has worn off.", 0.7)
         del target.statuses[index]
 
-    def apply(self, target, duration):
+    def apply(self, target, duration): #Called when the status is first applied to a creature. If the duration is -1 then it applies indefinitely, and will only go away with a cure. If the target already has this status effect, it just renews the duration. Applies any application effects
         message = "You've" if target is player else f"The {target.name} has"
         if duration == -1:
             print(f"{message} received the status effect {self.name} indefinitely.", 1)
@@ -80,14 +80,14 @@ class Status:
                 for application in self.application_list:
                     effects_list[application](target)
 
-    def cure(self, target, index):
+    def cure(self, target, index): #Called when one of the cure conditions is met for this status. Applies any cure effects.
         message = "You've" if target is player else f"The {target.name} has"
         print(f"{message} been cured of {self.name}!", 0.8)
         for cured in self.cured_list:
             effects_list[cured](target)
         del target.statuses[index]
     
-    def __call__(self, target, index): 
+    def __call__(self, target, index): #Called every turn that the target has this status. Applies any recurring effects and checks if the status's duration has expired.
         message = "Your" if target is player else f"The {target.name}'s"
         if target.statuses[index][1] == 0:
             self.recover(target, index)
@@ -101,14 +101,14 @@ class Status:
             target.statuses[index][1] -= 1
             self.duration = self.duration - 1 if target is player else self.duration
 
-class Standard_Effect:
+class Standard_Effect: #Class for basic, formulaic effects while still being extremely modular.
     def __init__(self, name, message_type, verb, amount, affect, operator):
-        self.name = name
-        self.message_type = message_type
-        self.verb = verb
-        self.amount = amount
-        self.affect = affect
-        self.operator = operator
+        self.name = name #name of the effect.
+        self.message_type = message_type #The message format that is selected to be printed when this effect occurs. There are multiple possible message formats for modularity sake.
+        self.verb = verb #The operating verb that is used in constructing the message that is printed when this effect occurs.
+        self.amount = amount #The amount of whatever this effect controls, usually health, energy, or a stat.
+        self.affect = affect #Used for determining what this effect affects. Will usually be health, energy, or a stat.
+        self.operator = operator #Used for computing how that affected stat is changed by the amount, can be addition, subtraction, or multiplication.
         effects_list[self.name] = self
 
     def __call__(self, target):
@@ -122,13 +122,13 @@ class Standard_Effect:
         target.health = operators[self.operator](target.health, self.amount) if self.affect == "Health" else target.health
         p.mana = operators[self.operator](p.mana, self.amount) if self.affect == "Mana" else p.mana
         p.energy = operators[self.operator](p.energy, self.amount) if self.affect == "Energy" else p.energy
-        target.gold = operators[self.operator](target.gold, self.amount) if self.affect == "Gold" else target.gold
+        player.gold = operators[self.operator](player.gold, self.amount) if self.affect == "Gold" else player.gold
         p.effective_strength = operators[self.operator](p.effective_strength, self.amount) if self.affect == "Strength" else p.effective_strength
         p.effective_dexterity = operators[self.operator](p.effective_dexterity, self.amount) if self.affect == "Dexterity" else p.effective_dexterity
         p.effective_intelligence = operators[self.operator](p.effective_intelligence, self.amount) if self.affect == "Intelligence" else p.effective_intelligence
         p.speed = operators[self.operator](p.speed, self.amount) if self.affect == "Speed" else p.speed
 
-class Apply_Cure:
+class Apply_Cure: #Simple class for cure effects, necessary for consumable items that apply a cure such as an antidote.
     def __init__(self, name):
         self.name = name
         effects_list[self.name] = self
@@ -142,14 +142,14 @@ class Apply_Cure:
 #          BACK-END FUNCTIONS           #
 #########################################
 
-def recur_statuses(target, exhaust=False):
+def recur_statuses(target, exhaust=False): #command used to call every status the target has once, triggering their recurring effects. If exhaust is True then it will instantly run out every status the target has until they've recovered from all of them, which is a safe way of removing statuses from enemies after battle quickly so that the recovery effects can occur, which is usually where any changed stats would revert back to normal.
     while True:
         for index, status in enumerate(target.statuses):
             statuses_list[status[0]](target, index)
         if len(target.statuses) == 0 or not exhaust:
             break
 
-def cure_check(target, cure_all=False):
+def cure_check(target, cure_all=False): #checks if any of the cure conditions are met for any of the targets statuses, and cures them if so.
     for index, ailment in enumerate(target.statuses):
         for possible_cure in statuses_list[ailment[0]].cures:
             if target.cures_list[possible_cure] == True or cure_all == True:

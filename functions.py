@@ -9,10 +9,10 @@ import time
 #           GLOBAL VARIABLES            #
 #########################################
 
-printing = True
-sleeping = True
-sleepmultiplier = 1
-_print = print
+printing = True #Boolean that works with the modified print function to determine if the game should be printing text or ignoring print lines, useful for when you want functions that would normally be spouting text to remain silent and work in the background.
+sleeping = True #Boolean that works with the modified sleep function to determine if the game should be sleeping between lines of text or ignoring sleep commands.
+sleepmultiplier = 1 #Determines how quickly to progress through sleep commands between text, higher value means faster text. Can be changed by the player through the 'Settings' command.
+_print = print #The old print command is stored as '_print', just incase it's needed for some reason.
 
 #########################################
 #          BACK-END FUNCTIONS           #
@@ -60,22 +60,22 @@ def basic_attack(move, user, target, weapon, message=f"the attacker attacked"): 
     else:
         damage = 0
         for i, dmg in enumerate(weapon.damages):
-            if i <= 3:
-                if dmg == move.damagetype:
-                    pass
-                else:
-                    continue
+            bonus = 0
+            if dmg == move.damagetype:
+                bonus += move.bonusdamage
+            elif i <= 3:
+                continue
             if dmg in target.weaknesses:
-                damage += weapon.damages[dmg]*1.5*user.damage_affinities[dmg]
+                damage += (weapon.damages[dmg]+bonus)*1.5*user.damage_affinities[dmg]
                 #print(f"{dmg}: Weakness! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1.5} dmg)")
             elif dmg in target.resistances:
-                damage += weapon.damages[dmg]*0.5*user.damage_affinities[dmg]
+                damage += (weapon.damages[dmg]+bonus)*0.5*user.damage_affinities[dmg]
                 #print(f"{dmg}: Resistance! ({weapon.damages[dmg]}->{weapon.damages[dmg]*.5} dmg)")
             elif dmg in target.immunities:
-                damage += weapon.damages[dmg]*0*user.damage_affinities[dmg]
+                damage += (weapon.damages[dmg]+bonus)*0*user.damage_affinities[dmg]
                 #print(f"{dmg}: Immunity! ({weapon.damages[dmg]}->{weapon.damages[dmg]*0} dmg)")
             else:
-                damage += weapon.damages[dmg]*1*user.damage_affinities[dmg]
+                damage += (weapon.damages[dmg]+bonus)*1*user.damage_affinities[dmg]
                 #print(f"{dmg}: Standard! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1} dmg)")
     damage = round(damage)
     if random.randint(0, 100) <= move.critchance+weapon.critchance and move.critchance != -1:
@@ -92,15 +92,15 @@ def print_override(string, sleeptime=0): #replacement for the default print func
         if sleeping == True:
             time.sleep(sleeptime/sleepmultiplier)
             
-def disable_sleep():
+def disable_sleep(): #turns sleeping off, used for testing purposes.
     global sleeping
     sleeping = False
     
-def sleep(sleeptime):
+def sleep(sleeptime): #modified version of time.sleep that can take into account both whether sleeping has been globally disabled, and any modifications to the length of sleep time in the case of settings changes.
     if sleeping == True and printing == True:
         time.sleep(sleeptime/sleepmultiplier)
 
-def header(string="", sleeptime=0): #this is used to print title bars to separate large portions of text such as when printing long vertical lists, used for aesthetic appeal
+def header(string="", sleeptime=0): #this is used to print title bars to separate large portions of text such as when printing long vertical lists, used for aesthetic appeal.
     braces = "[]" if len(string) > 0 else "--"
     side_dashes = ["-"] * (24-round(len(string)/2))
     if string != "":

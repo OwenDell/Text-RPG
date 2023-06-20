@@ -19,29 +19,28 @@ moves_list = c.moves_list
 specials_list = c.specials_list
 statuses_list = s.statuses_list
 basic_attack = f.basic_attack
-test_dummy = ''
-battling = False
+battling = False #boolean for whether the player is currently engaged in combat, necessary for a few function checks.
 
 #########################################
 #               CLASSES                 #
 #########################################
 
-class Attack:
-    def __init__(self, learned, name, description, damage, damagetype, accuracy, critchance, mana, energy, verb, special):
-        self.learned = learned
-        self.name = name
-        self.description = description
-        self.damage = damage
-        self.damagetype = damagetype
-        self.accuracy = accuracy
-        self.critchance = critchance
-        self.mana = mana
-        self.energy = energy
-        self.verb = verb
-        self.special = special
-        self.associated_weapon = p.empty
-        global moves_list
-        moves_list[self.name] = self
+class Attack: #class for every basic attack in the game used by both enemies and players.
+    def __init__(self, learned, name, description, damage, bonusdamage, damagetype, accuracy, critchance, mana, energy, verb, special):
+        self.learned = learned #Bool for whether the player has learned this move, meaning it will remain permanently available to them regardless of it's association to equipped weapons. New moves can be learned through events, tutors, or using spell scrolls.
+        self.name = name #The name of the attack.
+        self.description = description #The description of the attack.
+        self.damage = damage #The amount of damage the attack does while unassociated with any weapon. This means if the player has learned the move and doesn't have a weapon that supersecedes it, or for enemies using this move who don't have equipped weapons.
+        self.bonusdamage = bonusdamage #The bonus damage added to the attack only weapon associated with a weapon. The bonus damage will be applied in the form of the moves damagetype
+        self.damagetype = damagetype #The damage type of this move, if unassociated to a weapon then this will just be the form of damage that the moves damage stat comes in. If it is associated to a weapon then this is the type of physical damage it will use from that weapon, or apply this moves bonus damage if not physical to the associated elemental damage.
+        self.accuracy = accuracy #The % chance for the move to hit the target. Accuracy is not the only factor, the associated weapons bonus accuracy, the targets evasion, the players stats, and any effects on either side will also have an impact. An accuracy of -1 means the move is guaranteed to hit/activate
+        self.critchance = critchance #The % chance for the move to be a critical hit, in which case the associated weapons critical multiplier will be applied to all damage dealt (usually 1.5x).
+        self.mana = mana #The mana cost of using this move, does not apply to enemies.
+        self.energy = energy #The energy cost of using this move, does not apply to enemies.
+        self.verb = verb #The verb that will be printed when using this move.
+        self.special = special #The special move that will be used instead of a basic attack when this attack is used (if any).
+        self.associated_weapon = p.empty #The associated weapon of this move, necessary for many of the stats when using the move. The associated weapon is by default empty, which applies no bonuses and has baseline stats for the attack to function, and is used when enemies attack as they don't have weapons, and if the player learns a move without associating a weapon to it.
+        moves_list[self.name] = self 
         if self.learned == True:
             player.moves[self.name] = moves_list[self.name]
         
@@ -50,11 +49,11 @@ class Attack:
         accuracy_desc =  f" | {self.accuracy}% Accuracy" if self.accuracy != -1 else ""
         return f"{self.name}: {self.description} {damage_desc}. [{self.critchance}% Critical Chance{accuracy_desc}] (Costs {self.mana} Mana & {self.energy} Energy)"
         
-    def __call__(self, user, target):
+    def __call__(self, user, target): #called when either the player or an enemy uses an attack, and goes through all the associated procedures to see if it will hit, if it crits, applying damage and potentially any special effects.
         global moves_list
-        weapon = self.associated_weapon if user is player else p.empty
+        weapon = self.associated_weapon if user is player else p.empty #the associated weapon will always be empty for enemies
         message = ["You", f"the {target.name}"] if user is player else [f"The {user.name}", "You"]
-        if (random.randint(0, 100) <= (self.accuracy+weapon.accuracy)-target.evasion and target.evasion != -1) or self.accuracy == -1:
+        if (random.randint(0, 100) <= (self.accuracy+weapon.accuracy)-target.evasion and target.evasion != -1) or self.accuracy == -1: #-1 accuracy means the move is unmissable, and takes precedence over the targets -1 evasion, which means the target is unhittable.
             if len(self.special) <= 0:
                 basic_attack(self, user, target, weapon, f"{message[0]} {self.verb} {message[1]}")
             else:
@@ -96,7 +95,7 @@ def player_move(target): #gets a move input from the player, checks if that move
 def heal(target): #heals the target back to full health
     target.health = target.maxHP
 
-def fight(target): #starts a battle between the player and an enemy
+def fight(target): #starts a battle between the player and an enemy. The battle only ends if either side reaches 0 HP or flees combat.
     global battling
     battling = True
     turn_count = 1
@@ -131,7 +130,7 @@ def fight(target): #starts a battle between the player and an enemy
     player.health, p.mana, p.energy, target.health = f.limit([player.health, p.mana, p.energy, target.health], [player.maxHP, p.maxMana, p.maxEnergy, target.maxHP])
     heal(target)
 
-def hpcheck(target, checkup=False): #checks the hp of both the player and the target enemy, if one of their HP is at 0 then it ends the battle by returning True. Awards the target enemies xp and gold to the player if the player defeats them in combat.
+def hpcheck(target, checkup=False): #checks the hp of both the player and the target enemy, if one of their HP is at 0 then it ends the battle by returning True. Awards the target enemies xp and gold to the player if the player defeats them in combat. Also checks if any cures are applicable for any current status effects.
     if p.energy <= 0:
         player.cures_list["Saturated"] = False
         existed = False
@@ -164,7 +163,7 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
     if checkup == True:
         print(f"HP of {target.name}: {target.health}/{target.maxHP}")
 
-def equipment_swap(slot, equipment):
+def equipment_swap(slot, equipment): #Goes through the procedure when the player swaps out a piece of equipment throught he equipment command. Removes any moves from the players move list that were tied to the old weapon, and gives any moves tied to the new one. 
     if slot == "Mainhand" or slot == "Offhand" or slot == "Special":
         for attack in moves_list:
             try:
@@ -177,16 +176,19 @@ def equipment_swap(slot, equipment):
                         moves_list[attack].associated_weapon = p.equipment_list[p.equipment["Special"]]
                     else:
                         moves_list[attack].associated_weapon = p.empty
-                        if moves_list[attack].learned != True:
+                        if not moves_list[attack].learned:
                             player.moves.pop(attack)
             except:
                 pass
         for attack in p.equipment_list[equipment].moves:
-            if moves_list[attack].associated_weapon is p.empty or moves_list[attack].associated_weapon.name == equipment:
+            if (moves_list[attack].associated_weapon is p.empty and not moves_list[attack].learned) or moves_list[attack].associated_weapon.name == equipment:
                 moves_list[attack].associated_weapon = p.equipment_list[equipment]
                 player.moves[attack] = moves_list[attack]
-            else:
-                print(f"{p.equipment_list[equipment].name} has the move {moves_list[attack].name}, however that move is already bound to {moves_list[attack].associated_weapon.name}, would you like to rebind it to {p.equipment_list[equipment].name}?", 1.5)
+            else: #gives the player the choice to leave the attack bound to another weapon if that move is already known by the player either through a different weapon or it's learned
+                if moves_list[attack].learned:
+                    print(f"{p.equipment_list[equipment].name} has the move {moves_list[attack].name}, however you've already learned that move, would you like to rebind it to {p.equipment_list[equipment].name}?", 1.5)
+                else:
+                    print(f"{p.equipment_list[equipment].name} has the move {moves_list[attack].name}, however that move is already bound to {moves_list[attack].associated_weapon.name}, would you like to rebind it to {p.equipment_list[equipment].name}?", 1.5)
                 while True:
                     response = f.capitalize(input(f"Enter either (1) 'Yes' to rebind the move to {p.equipment_list[equipment].name}, or (2) 'No' to leave it as it is: "))
                     sleep(0.5)
@@ -205,7 +207,7 @@ def equipment_swap(slot, equipment):
 #                 MOVES                 #
 #########################################
 
-class m_Options:
+class m_Options: #prints a list of all available moves and actions the player can take in combat. Does not use up the players turn.
     def __init__(self):
         self.name = "Options"
         global moves_list
@@ -222,7 +224,7 @@ class m_Options:
             print(player.moves[i], 0.2)
         f.header("", 0.5)
     
-class m_Flee:
+class m_Flee: #instantly flees from combat, in the future there will only be a chance to flee based on the player and targets stats.
     def __init__(self):
         self.name = "Flee"
         global moves_list
@@ -237,7 +239,7 @@ class m_Flee:
         battling = False
         print(f"You fled from the enemy {target.name}!")
            
-class m_Use:
+class m_Use: #use a consumable item, which can be something simple that affects mana, energy, or health, or something more complex that applies a status effect.
     def __init__(self):
         self.name = "Use"
         global moves_list
@@ -289,7 +291,7 @@ class m_Use:
 #               SPECIALS                #
 #########################################
 
-class s_Execute:
+class s_Execute: #instantly kills the target, developer command used for testing
     def __init__(self):
         self.name = "Execute"
         self.damage = 99999999999
@@ -360,12 +362,12 @@ for globals_object in temp_globals:
 #               ATTACKS                 #
 #########################################
 
-punch = Attack(True, "Punch", "A quick punch with your fist", 10, "Blunt", 110, 10, 0, 0, "punched", "")
-slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, "Slash", 100, 15, 0, 0, "slashed", "")
-stab = Attack(False, "Stab", "A piercing jab with your weapon", 30, "Pierce", 85, 20, 0, 0, "stabbed", "")
-bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, "Blunt", 95, 5, 0, 0, "bashed", "")
-uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, "Blunt", 80, 10, 10, 0, "delivered a devastating uppercut to", "Uppercut")
-execute = Attack(False, "Execute", "You delete the enemy from existence", -1, "Physical", -1, 0, 0, 0, "executed", "Execute")
-claw = Attack(False, "Claw", "A painful slash with your claws", 10, "Slash", 90, 15, 0, 0, "clawed", "")
-bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, "Pierce", 85, 10, 0, 0, "bit", "")
-bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, "Pierce", -1, 25, 0, 10, "shot", "Bowshot")
+punch = Attack(True, "Punch", "A quick punch with your fist", 10, 3, "Blunt", 110, 10, 0, 0, "punched", "")
+slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, 3, "Slash", 100, 15, 0, 0, "slashed", "")
+stab = Attack(False, "Stab", "A piercing jab with your weapon", 30, 7, "Pierce", 85, 20, 0, 0, "stabbed", "")
+bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, 5, "Blunt", 95, 5, 0, 0, "bashed", "")
+uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 20, "Blunt", 80, 10, 10, 0, "delivered a devastating uppercut to", "Uppercut")
+execute = Attack(False, "Execute", "You delete the enemy from existence", -1, 999999, "Physical", -1, 0, 0, 0, "executed", "Execute")
+claw = Attack(False, "Claw", "A painful slash with your claws", 10, 10, "Slash", 90, 15, 0, 0, "clawed", "")
+bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 15, "Pierce", 85, 10, 0, 0, "bit", "")
+bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, 0, "Pierce", -1, 25, 0, 10, "shot", "Bowshot")

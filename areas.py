@@ -19,15 +19,15 @@ import npc as n
 print = f.print_override
 sleep = f.sleep
 player = c.player
-areas = {} #a list of all areas that gets filled every time a new area is initialized.
-activities_list = {}
-k_start = True
+areas = {} #a dictionary of all areas that gets filled every time a new area is initialized.
+activities_list = {} #a dictionary of all activities that can be performed by the player within areas. Available activities will vary between areas, so the player will need to travel to new ones to access new opportunities
+k_start = True #the first area 'key'. Might start as False in the future if a tutorial is implemented which must be finished before enabling leaving the first area
 
 #########################################
 #          BACK-END FUNCTIONS           #
 #########################################
 
-def determine_area():
+def determine_area(): #used with the travel mechanic to determine what area the player should currently be in while traveling. Necessary for if the player travels past 1 or more areas to reach their destination at once, so the game knows what kind of area-specific highway encounters to use
     for area in areas:
         if p.position >= areas[area].distance:
             p.current_area = areas[area]
@@ -36,29 +36,29 @@ def determine_area():
 #               CLASSES                 #
 #########################################
 
-class Area:
+class Area: #class for all areas
     def __init__(self, name, description, exploring, type, level, distance, access, denialmessage, activities, encounters, local_enemies, highway_enemies):
-        self.name = name
-        self.description = description
-        self.exploring = exploring
-        self.type = type
-        self.level = level
-        self.distance = distance
-        self.access = access
-        self.denialmessage = denialmessage
-        self.activities = activities
-        self.encounters = encounters
-        self.local_enemies = local_enemies
-        self.highway_enemies = highway_enemies
+        self.name = name #the name of the area
+        self.description = description #the description of the area
+        self.exploring = exploring #the text that is printed while the player uses the 'explore' command within this area. Different between areas just for flavor.
+        self.type = type #The type of area. The three types are Settlement, Field, and Dungeon. Settlements are places where you usually won't be able to explore, and are sources of life and NPC's where the player can rest and restock. Fields are open areas the player can go out to to freely explore and perform various activities to gain loot, gold, and XP. Dungeons are areas with a gauntlet of rooms the player must try to get through all in one go that end with a bossfight and great rewards.
+        self.level = level #The area's level is used to determine lootpools and just to give a sense of how difficult the area is.
+        self.distance = distance #The area's distance in meters from the starting area of Chalgos whose distance is 0. Used to determine how long of a journey the player must undergo while travelling.
+        self.access = access #The area key associated with the area which is used to determine when a player should have access to new areas. Area keys will all be stored as separate boolean variables that will change to True upon completely various tasks or meeting certain requirements.
+        self.denialmessage = denialmessage #The message that's printed when a player tries to travel to an area they don't have access to. Can either clue the player in to what they need to do to gain access to the area or just provide flavor.
+        self.activities = activities #List of all activities that can be performed within this area.
+        self.encounters = encounters #List of possible encounters the player may find while exploring.
+        self.local_enemies = local_enemies #List of local enemies the player may encounter when they trigger the find Enemy encounter
+        self.highway_enemies = highway_enemies #List of highway enemies the player may encounter when they trigger the find Enemy encounter while travelling between areas. The pool of highway enemies currently in use is based on the player's current location which.
         areas[self.name] = self
 
     def __str__(self):
         return f"{self.name} ({self.type}): {self.description}. [{abs(self.distance-p.position)}m away]"
     
-    def find_encounter(self):
+    def find_encounter(self): #called when the player uses the explore command. Generates a random encounter from the pool of possible encounters, with associated weights for how likely each encounter is to be pulled.
         f.weighted_random(self.encounters)(self)
 
-    def travel(self):
+    def travel(self): #called when the player tries to travel between areas. Every loop the player loses 5 energy, travels their speed stat in meters closer to their target destination, and gets a random highway encounter. Most highway encounters will be uneventful.
         response = ""
         startpoint = p.position
         distance_traveled = 0
@@ -72,7 +72,7 @@ class Area:
             determine_area()
             player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])
             b.hpcheck(player)
-            while (iteration%7 == 0 and abs(p.position-self.distance) > p.speed) and abs(distance_traveled) > 0:
+            while (iteration%7 == 0 and abs(p.position-self.distance) > p.speed) and abs(distance_traveled) > 0: #Every 7 loops, the player is told their current location, health, and energy so the player can determine if they should turn back, use items to replenish themselves, or push onwards.
                 print(f"You've traveled {abs(distance_traveled)}/{abs(self.distance-startpoint)}m and have {player.health}/{player.maxHP} HP and {p.energy}/{p.maxEnergy} Energy, do you want to continue onwards?", 1.5)
                 response = f.capitalize(input("Enter (1) 'Yes' or (2) 'No' to continue onwards, or (3) 'Use' if you'd like to use an item: "))
                 sleep(0.5)
@@ -111,7 +111,7 @@ class Area:
 #              ACTIVITIES               #
 #########################################
         
-class a_Explore:
+class a_Explore: #pulls a random encounter from the current areas list of possible encounters. Uses 5 energy every time.
     def __init__(self):
         self.name = "Explore"
         global activities_list
@@ -130,7 +130,7 @@ class a_Explore:
         else:
             print("You don't have enough energy to do that!")
 
-class a_Shop:
+class a_Shop: #lets the player visit any shopkeepers in the current area. The player is given a list of all shopkeepers in the area and is able to choose which one they want to visit.
     def __init__(self):
         self.name = "Shop"
         activities_list[self.name] = self

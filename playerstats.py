@@ -10,14 +10,14 @@ import functions as f
 
 print = f.print_override
 sleep = f.sleep
-items_list = {}
-consumables_list = {}
-equipment_list = {}
-weapons_list = {}
-armor_list = {}
-keyitems_list = {}
-materials_list = {}
-health_potion_action = ["You drank a", "healing", " HP"]
+items_list = {} #Dictionary of all items in the game, this includes consumables, equipment, materials, and key items. All items will be divided into smaller categories below.
+consumables_list = {} #Category for consumable items
+equipment_list = {} #Category for equipment type items
+weapons_list = {} #Sub-category for weapon type equipment
+armor_list = {} #Sub-category for armor type equipment
+keyitems_list = {} #Category for key item type items
+materials_list = {} #Category for key item type items
+health_potion_action = ["You drank a", "healing", " HP"] #These 'actions' are used for easy modularity with consumable items, as they are pieced together along with other pieces of information when printing in the Use function.
 mana_potion_action = ["You drank a", "restoring", " Mana"]
 food_action = ["You ate a", "restoring", " Energy"]
 damage_action = ["You used a", "dealing", " damage"]
@@ -27,22 +27,22 @@ spell_action = ["You read a", "and learned the move", ""]
 #                STATS                  #
 #########################################
 
-player_name = "Nick"
-current_area = "Chalgos"
-position = 0
-mana = 20 
-maxMana = 20
-energy = 100
-maxEnergy = 100
-reqXP = 250
-strength = 1
+player_name = "Nick" #The players name, some NPC's will refer to the player by their name, and it shows up in a few other places. Mainly just intended to make the player feel more invested in the world. Defaults to "Nick" if the player chooses to skip the intro.
+current_area = "Chalgos" #Tracks the players current area
+position = 0 #Tracks the players current position, which affects their current area
+mana = 20 #How much mana the player currently has
+maxMana = 20 #The players maximum mana
+energy = 100 #How much energy the player currently has
+maxEnergy = 100 #The players maximum energy
+reqXP = 250 #The required amount of XP to level up, this will increase with each level
+strength = 1 #The players real stats, this is only increased through level ups.
 dexterity = 1
 intelligence = 1
-effective_strength = 1
+effective_strength = 1 #The players effective stats, which can change from things like statuses or equipment bonuses, and is what's used for all calculations, but is stored separately from the real stats so it knows what to revert to when those bonuses end.
 effective_dexterity = 1
 effective_intelligence = 1
-speed = 100
-equipment = {
+speed = 100 #The players speed, which is the number of meters of distance they move during each loop of travelling. This can be changed through various statuses or equipment bonuses.
+equipment = { #The players equipment slots, which will be updated throughout the game as the player acquires and swaps out new pieces of equipment.
     "Mainhand": "Empty",
     "Offhand": "Empty",
     "Special": "Empty",
@@ -59,21 +59,21 @@ equipment = {
 #               CLASSES                 #
 #########################################
 
-class item:
+class item: #for regular items, usually consumables.
     def __init__(self, slot, name, description, action, tier, quantity, value, affect, val1, val2, val3, effects, accuracy, lootweight):
-        self.slot = slot
-        self.name = name
-        self.description = description
-        self.action = action
-        self.tier = tier
-        self.quantity = quantity
-        self.value = value
-        self.affect = affect
-        self.val1 = val1
-        self.val2 = val2
-        self.val3 = val3
-        self.effects = effects
-        self.accuracy = accuracy
+        self.slot = slot #called slot for consistency, but in actuality this determines the type of item.
+        self.name = name #the name of the item.
+        self.description = description #the description of the item.
+        self.action = action #used to determine which of the 'action' text lists is used by the Use function when this item is used.
+        self.tier = tier #the tier of the item, used for determining loot pools.
+        self.quantity = quantity #how much of this item the player owns, should start as 0 for anything that isn't starting goods.
+        self.value = value #the value in gold of this item. Traders will use this price for determining how much to charge/offer for these items while shopping, also provides a clean reference for roughly how much this item is worth.
+        self.affect = affect #a string of what this item affects, used by the Use function with simple items that have straightforward properties for modularity.
+        self.val1 = val1 #The primary value of this item, nondescript for modularity sake, but this usually applies to whatever is directly being impacted in the 'affect' section.
+        self.val2 = val2 #The secondary value of this item, nondescript for modularity sake.
+        self.val3 = val3 #The tertiary value of this item, nondescript for modularity sake.
+        self.effects = effects #Not to be confused with 'affect', this is a list of all status effects that are applied to the target upon use.
+        self.accuracy = accuracy #The accuracy of this item, will usually be -1 (unmissable) for anything that isn't used to harm the enemy.
         self.lootweight = lootweight #The weighted odds on a 1-10 scale of finding this item, higher number means higher odds of finding it compared to other potential items in the same lootpool
         items_list[self.name] = self
         if slot == "Consumables":
@@ -117,7 +117,7 @@ class weapon: #for equipment, store every piece of equipment in equipment_list. 
 #          BACK-END FUNCTIONS           #
 #########################################
 
-def inventory_check(sleeptime=0, item_type="All Items"):
+def inventory_check(sleeptime=0, item_type="All Items"): #prints out a list of the players full inventory. Can be separated to only include certain sections of their inventory based on the types of items that should be shown for the situation, such as only showing consumables with the Use command.
     category_print = "" if item_type == "All Items" else f" ({item_type})"
     f.header(f"Inventory{category_print}", 0.5)
     for item in items_list:
@@ -125,7 +125,7 @@ def inventory_check(sleeptime=0, item_type="All Items"):
             print(f"{items_list[item].quantity}x {items_list[item].name}: {items_list[item].description}.", sleeptime)
     f.header("", 0.7)
 
-def loot(item, quantity=1):
+def loot(item, quantity=1): #Used when the player loots an item and adds it to their inventory.
     if isinstance(item, str):
         item = items_list[f.capitalize(item)]
         quantity = int(quantity)

@@ -1,6 +1,6 @@
 # Changelog
 
-## Version a0.2.3.1 (IN PROGRESS)
+## Version a0.2.3.2 (IN PROGRESS)
 - Added changelog :)
 - Added spell scroll consumable system
 - Added item rarity system

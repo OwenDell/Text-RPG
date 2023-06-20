@@ -20,22 +20,22 @@ specials_list = {} #a dictionary of special moves that are stored separately fro
 #               CLASSES                 #
 #########################################
 
-class Creature:
+class Creature: #The class for all creatures, including the player. Using the same class for both has some complications, and in a lot of cases it means that the variables don't entirely mean the same thing for the player vs enemies, but it works.
     def __init__(self, name, level, XP, maxHP, gold, evasion, moves, weaknesses, resistances, immunities, intro):
-        self.name = name
-        self.level = level
-        self.XP = XP
-        self.maxHP = maxHP
-        self.health = maxHP
-        self.gold = gold
-        self.evasion = evasion
-        self.moves = moves
-        self.intro = intro
-        self.weaknesses = weaknesses
-        self.resistances = resistances
-        self.immunities = immunities
-        self.statuses = []
-        self.cures_list = { #this is stored here as it can't be universal or else the player using an antidote would trigger the enemy to be cured of their poison or visa versa
+        self.name = name #name of the creature
+        self.level = level #level of the creature, in the case of enemies this is just used to determine its difficulty.
+        self.XP = XP #In the case of the player, this is how much XP they have to determine how close they are to levelling up. For enemies, this is how much XP they give when defeated by the player.
+        self.maxHP = maxHP #The creatures maxHP, used for internal calculations to be reverted back to after battle or to limit overhealing.
+        self.health = maxHP #The creatures health, this is the value that will change through a battle.
+        self.gold = gold #Works the same way as XP, total gold for the player, and the amount of gold dropped in the case of enemies.
+        self.evasion = evasion #Determines how likely it is for this creature to avoid getting hit by an attack.
+        self.moves = moves #List of moves this creature can perform during combat, for the player this is actually a dictionary that will change throughout the game as the player learns new moves and changes out their gear.
+        self.intro = intro #The intro text played when the player encounters this creature.
+        self.weaknesses = weaknesses #List of damage types this creature is weak to, and will take 50% more damage from.
+        self.resistances = resistances #List of damage types this creature is resistant to, and will take 50% less damage from.
+        self.immunities = immunities #List of damage types this creature is immune to, and will take 100% less damage from.
+        self.statuses = [] #List of statuses currently affecting this creature. Statuses come in the form of lists, where the first part is the name of the status, and the second part is the duration.
+        self.cures_list = { #Dictionary of status cures this creature has access to. If the creature is impacted by a status and one of it's cures are in here as True, then they will be cured of it. This is stored here as it can't be universal or else the player using an antidote would trigger the enemy to be cured of their poison or visa versa.
             "Conclusion": False,
             "Victory": False,
             "Defeat": False,
@@ -44,7 +44,7 @@ class Creature:
             "Lesser Antidote": False,
             "Antidote": False
         }
-        self.damage_affinities = {
+        self.damage_affinities = { #Dictionary of every damage type and this creatures 'affinity' for it. Affinity impacts how much damage they do with this damage type. For now they are all at base of 1 and will only change due to statuses or player upgrades, but in the future it may be changed so this can be vary between creatures who do more damage with different damage types.
             "Physical": 1,
             "Slash": 1,
             "Pierce": 1,
@@ -67,7 +67,7 @@ class Creature:
 #          BACK-END FUNCTIONS           #
 #########################################
 
-def dummy_init(dummy):
+def dummy_init(dummy): #Sets the dummy to any creature in the game so it can be fought using developer commands. Used for testing purposes.
     return globals()[dummy]
 
 #########################################

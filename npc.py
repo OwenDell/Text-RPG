@@ -27,14 +27,14 @@ armor_list = p.armor_list
 keyitems_list = p.keyitems_list
 materials_list = p.materials_list
 specials_list = c.specials_list
-npc_list = {}
-shopkeeper_list = {}
+npc_list = {} #Dictionary of all NPC's, including shopkeepers. NPC's are defined by named entities that you can interact with, build relationship with, and have potential quests, tasks, or opportunities for you.
+shopkeeper_list = {} #Dictionary of all specifically shopkeeper NPC's.
 
 #########################################
 #               CLASSES                 #
 #########################################
 
-class Shopkeeper:
+class Shopkeeper: #class for shopkeeper NPC's. Regular NPC's will use a similar class constructor, however without all the shopkeeper specific aspects.
     def __init__(self, name, description, relation, quests, locations, highway_locations, interactions, intros, dialogue, shop_categories, shop_tiers, shop_whitelist, shop_blacklist):
         self.name = name #The NPC's name
         self.description = description #The NPC's description.
@@ -49,15 +49,14 @@ class Shopkeeper:
         self.type = "Shopkeeper"
         npc_list[self.name] = self
         shopkeeper_list[self.name] = self
-        self.shop_inventory = {
+        self.shop_inventory = { #Dictionary of all the shop categories the player can choose from when purchasing from this NPC.
             "Consumables": {},
             "Weapons": {},
             "Armor": {},
-            "Spells": {},
             "Key Items": {},
             "Materials": {}
         }
-        for item in items_list:
+        for item in items_list: #Goes through every item in the game and checks if that item exists in both the shopkeepers list of sold item categories and tiers or is a whitelisted item and not a blacklisted item. They are then separated into specific categories
             if ((items_list[item].slot in shop_categories and items_list[item].tier in shop_tiers) and items_list[item].name not in shop_blacklist) or items_list[item].name in shop_whitelist:
                 if item in consumables_list:
                     self.shop_inventory["Consumables"][item] = items_list[item]
@@ -65,8 +64,6 @@ class Shopkeeper:
                     self.shop_inventory["Weapons"][item] = items_list[item]
                 if item in armor_list:
                     self.shop_inventory["Armor"][item] = items_list[item]
-                if item in specials_list:
-                    self.shop_inventory["Spells"][item] = items_list[item]
                 if item in keyitems_list:
                     self.shop_inventory["Key Items"][item] = items_list[item]
                 if item in materials_list:
@@ -75,7 +72,7 @@ class Shopkeeper:
     def __str__(self):
         return f"{self.name}: {self.description} [Reputation: {self.relation}]"
     
-    def buy(self):
+    def buy(self): #called when the player chooses to buy from a shopkeeper NPC. Prints out a list of all shop categories that the shopkeeper offers, and then a list of all items they carry within each category. Every shopkeeper will have a different set of items for sale, so players will need to travel between areas to access the items they want to purchase.
         while True:
             f.header(f"{self.name}'s Shop", 0.5)
             for category in self.shop_inventory:
@@ -114,7 +111,7 @@ class Shopkeeper:
             else:
                 print("Invalid response, your response must be the name of a listed shop category, or 'Exit' to leave the shop.", 1)
 
-    def sell(self):
+    def sell(self): #called when the player chooses to sell to a shopkeeper NPC. Prints out a list of all items the player has in their inventory, and will tell players the sell price of items when they offer to sell them. Players can sell more than 1 item at a time.
         while True:
             p.inventory_check(0.15)
             response = f.capitalize(input("Enter either the name of the item you want to sell, or 'Exit' to leave the shop: "))
@@ -142,7 +139,7 @@ class Shopkeeper:
 #          BACK-END FUNCTIONS           #
 #########################################
 
-def converse(npc):
+def converse(npc): #called when the player visits an NPC. Plays an intro dialogue line immediately based on the players relation with the NPC, or if it's their first time meeting them. Afterwards it prints a list of all available interactions they can perform with the NPC, and asks the player what they want to do with them.
     npc = npc_list[npc]
     if npc.dialogue_track == -1:
         print(f"{npc.name}: {npc.intros['Meet']}", 3)
@@ -161,19 +158,19 @@ def converse(npc):
         f.header("", 0.5)
         response = f.capitalize(input(f"What do you want to do with {npc.name}? "))
         sleep(0.5)
-        if response == "Exit":
+        if response == "Exit": #Exits dialogue with the NPC
             break
         elif response in npc.interactions:
-            if response == "Buy":
+            if response == "Buy": #If the NPC is a shopkeeper, the player can access their shop here
                 npc.buy()
-            elif response == "Sell":
+            elif response == "Sell": #If the NPC is a shopkeeper, the player can sell their items to them here
                 npc.sell()
-            elif response == "Quests":
+            elif response == "Quests": #If the NPC has quests or tasks for the player, they can view and accept them here.
                 f.header("Available Quests", 0.5)
                 for quest in npc.quests:
                     print(quest, 0.3)
                 f.header("", 1)
-            elif response == "Talk":
+            elif response == "Talk": #The player can converse with the NPC, where the NPC will go through multiple lines of dialogue in segmented chunks. The player will usually need to talk to the NPC multiple times to see all their lines of dialogue, at which point the NPC will just begin repeating their last dialogue chunk.
                 print("")
                 for line in npc.dialogue[npc.dialogue_track]:
                     print(f"{npc.name}: {line}", 4)
@@ -194,4 +191,4 @@ Andre = Shopkeeper("Andre", "An old, grizzled blacksmith who's forged weapons an
 Malbras = Shopkeeper("Malbras", "The kind owner of the only tavern in Chalgos. He'll sell basic supplies and food necessary for adventuring.", 10, [], ["Chalgos"], [], ["Talk", "Quests", "Buy", "Sell", "Exit"], \
                     {"Meet": f"Hey there, you must be {p.player_name}, my name's Malbras, make yourself comfortable!", -100: "The only reason you can even show your face in here is because I can't afford a guard...", -60: "You're lucky I'm so lenient towards paying customers...", -10: "What'll it be today?", 30: f"Hey there {p.player_name}, what're ya lookin for today?", 60: f"Welcome in {p.player_name}! Make yourself right at home!"}, \
                     [["I'm the proud owner of this here fine tavern, we offer a variety of nutritious meals and even a few potions to get you back on your feet if need be.", "If there's anything you need just say the word and I'll have it right up for you! ... If you've got the money that is."]], \
-                    ["Consumables"], [1, 2], ["Hearty Stew", "Lesser Antidote"], ["Throwing Knife"])
+                    ["Consumables"], [1, 2], ["Hearty Stew", "Lesser Antidote", "Uppercut Scroll"], ["Throwing Knife"])

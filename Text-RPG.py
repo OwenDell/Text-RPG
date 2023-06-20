@@ -18,17 +18,16 @@ import npc as n
 #           GLOBAL VARIABLES            #
 #########################################
 
-print = f.print_override
-sleep = f.sleep
+print = f.print_override 
+sleep = f.sleep 
 player = c.player
 moves_list = c.moves_list
 activities_list = a.activities_list
 heal = b.heal
-cleanse = s.cleanse
-dummy = c.wwe_champ
+dummy = c.wwe_champ #Used with the fight developer command, stores a 'dummy' version of an enemy that can be changed out with the set_dummy command to make testing specific enemies easy
 fight = b.fight
 loot = p.loot
-commands_list = {}
+commands_list = {} #Dictionary of all front-end commands that the player can enter, using the Command class
 p.current_area = a.chalgos
 test_iteration = 1 #used for the run_test function, that keeps track of how many tests have been run during this instance of the program.
 running = True #while true, the main gameplay loop will continue running. Ends with either the end_game() function or if the player dies.
@@ -37,7 +36,7 @@ running = True #while true, the main gameplay loop will continue running. Ends w
 #          BACK-END FUNCTIONS           #
 #########################################
 
-def converter(*args): #converts string inputs into either global objects, integers, floats, or lists based on the tag at the beginning of the string.
+def converter(*args): #converts string inputs into either global objects, integers, floats, or lists based on the tag at the beginning of the string. Mainly used for developer console commands
     args = list(args)
     for index, parameter in enumerate(args):
         if "/O/" in parameter[:3].upper():
@@ -52,7 +51,7 @@ def converter(*args): #converts string inputs into either global objects, intege
             pass
     return args
 
-def learn_move(move_name): #adds a new move to the player.moves dictionary
+def learn_move(move_name): #adds a new move to the player.moves dictionary. Mainly used for testing purposes
     move_name = f.capitalize(move_name)
     try:
         player.moves[move_name] = moves_list[move_name]
@@ -67,16 +66,16 @@ def run_test(*args): #used for running tests, mainly intended to be used through
     print(f"Test #{test_iteration} complete.")
     test_iteration += 1
 
-def set_dummy(dummy_name):
+def set_dummy(dummy_name): #Sets the dummy to any creature in the game, so that they can be fought with the fight command by targetting the dummy object. Used for testing.
     global dummy
     dummy = c.dummy_init(dummy_name)
     
-def end_game(): #ends the game.
+def end_game(): #Developer command to end the game.
     global running
     running = False
     print("Ending gameplay loop...")
         
-def duel(duelist1, duelist2): #mostly just used for testing, at least currently.
+def duel(duelist1, duelist2): #Choose any two creatures to fight each other in a duel until one dies. Mostly just used for testing, at least currently. 
     victor = False
     loser = False
     print(f"A 1v1 Duel begins between the {duelist1.name} and the {duelist2.name}!")
@@ -93,10 +92,9 @@ def duel(duelist1, duelist2): #mostly just used for testing, at least currently.
         victor = duelist2
         loser = duelist1
     if victor != False:
-        victor.gold += loser.gold
         print(f"The {victor.name} has felled the {loser.name} in single combat, earning them {loser.gold} gold!")
 
-def teleport(area):
+def teleport(area): #Developer command to instantly teleport to any area without having to go through the travel process.
     try:
         p.current_area = a.areas[f.capitalize(area)]
         p.position = a.areas[f.capitalize(area)].distance
@@ -104,10 +102,10 @@ def teleport(area):
     except:
         print(f"Invalid area name \'{f.capitalize(area)}\'", 0.3)
 
-def set_rep(npc, rep):
+def set_rep(npc, rep): #Developer command to set reputation with any NPC to any value.
     n.npc_list[npc].relation = rep
 
-def devmode(allitems=False, allmoves=False, gold=False):
+def devmode(allitems=False, allmoves=False, gold=False): #Developer command to quickly and easily get access to all items, moves, and a lot of gold. Makes testing much quicker and easier.
     if allitems != False and allitems != "False":
         for item in p.items_list:
             loot(item, 999)
@@ -156,7 +154,7 @@ def f_commands(): #prints a list of all the front-end functions to the player, w
             print(activities_list[activity], 0.3)
     f.header("", 0.5)
     
-def f_settings():
+def f_settings(): #prints out a list of changeable settings and their current values. Allows the player to change the settings as they desire.
     f.header("Settings", 0.5)
     print(f"Text Speed: {f.sleepmultiplier}x Speed", 0.3)
     f.header("", 0.5)
@@ -173,16 +171,14 @@ def f_settings():
     else:
         print(f"Invalid option \'{response}\'.")
             
-def f_inventory():
+def f_inventory(): #prints out the players full inventory
     p.inventory_check(0.15)
 
-def f_use():
+def f_use(): #allows the player to use any consumable item while out of combat
     c.moves_list["Use"](player, player)
 
-def f_stats():
-    f.header("Player Stats", 0.5)
-    #print(f"Level: {player.level}\nExperience: {player.XP}/{p.reqXP}\nHealth: {player.health}/{player.maxHP}\nMana: {p.mana}/{p.maxMana}\nEnergy: {p.energy}/{p.maxEnergy}\nGold: {player.gold}\nStrength: {p.strength} (+{p.effective_strength-p.strength})\
-          #\nDexterity: {p.dexterity} (+{p.effective_dexterity-p.dexterity})\nIntelligence: {p.intelligence} (+{p.effective_intelligence-p.intelligence})")
+def f_stats(): #prints out current information about the player
+    f.header(f"{p.player_name}'s Stats", 0.5)
     print(f"Current Area: {p.current_area.name}", 0.3)
     print(f"Level: {player.level}", 0.3)
     print(f"Experience: {player.XP}/{p.reqXP}", 0.3)
@@ -199,7 +195,7 @@ def f_stats():
     print(f"Speed: {p.speed}%", 0.3)
     f.header("", 0.5)
 
-def f_equipment():
+def f_equipment(): #prints out the players currently equipped gear, as well as allowing them to inspect any piece of equipment and swapping out their currently equipped gear
     while True:
         f.header("Currently Equipped Gear", 0.5)
         for equipped in p.equipment:
@@ -292,13 +288,13 @@ def f_equipment():
         else:
             print("Invalid response, please enter one of the provided options. (You can also respond with the corresponding number to quickly choose a response)", 1)
     
-def f_moves():
+def f_moves(): #prints out the players list of currently known moves
     f.header("Available Moves", 0.5)
     for i in player.moves:
         print(player.moves[i], 0.2)
     f.header("", 0.5)
 
-def f_status_effects():
+def f_status_effects(): #prints out all status effects currently affecting the player
     f.header("Status Effects", 0.5)
     for item in player.statuses:
         print(s.statuses_list[item[0]], 0.3)
@@ -306,7 +302,7 @@ def f_status_effects():
         print("You don't have any status effects.", 0.5)
     f.header("", 0.5)
 
-def f_travel():
+def f_travel(): #prints out list of all areas and allows the player to travel between them. Travelling time is determined by the players speed stat and the distance between the target location and the current area
     f.header("List of Areas", 0.5)
     for area in a.areas:
         print(a.areas[area], 0.3)
@@ -329,7 +325,7 @@ def f_travel():
 #               COMMANDS                #
 #########################################
 
-class Command:
+class Command: #simple class for the player commands system
     def __init__(self, name, description):
         self.name = name
         self.description = description
@@ -356,7 +352,17 @@ travel = Command("Travel", "Begin the journey to a different area")
 #             GAMEPLAY LOOP             #
 #########################################
 
-while running == True:
+if f.capitalize(input("Do you want to skip the intro (Y/N)? ")) != "Y": #the story intro to the game and where the player chooses their name, gives the player the chance to skip it if they want, doing so defaults the player name to "Nick"
+    sleep(1)
+    print(f"Welcome to the grand, fantastical land of Myravolt, a land of both danger and opportunity.", 4.5)
+    print(f"You are a young lad born in the quaint village of Chalgos, a secluded town in the middle of the Gavlynn Forest, and you've never known life outside it.", 6)
+    print(f"However, you've never been quite satisfied with this life, you yearn for adventure and glory.", 3.5)
+    print(f"So, armed with only your grandfather's old sword that he gave you on your 18th birthday, you decide today's finally the day you set off out into the great unknown...", 6)
+    p.player_name = input("Enter your name: ")
+    sleep(1)
+    print(f"Now go off into the lands of Myravolt {p.player_name}, and best of luck to you!", 4)
+
+while running == True and player.health > 0: #the main gameplay loop, the player can use various front end commands.
     b.hpcheck(player)
     sleep(0.5)
     response = f.capitalize(input("What would you like to do? "))

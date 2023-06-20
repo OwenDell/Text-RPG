@@ -26,6 +26,7 @@ weapons_list = p.weapons_list
 armor_list = p.armor_list
 keyitems_list = p.keyitems_list
 materials_list = p.materials_list
+spell_list = p.spell_list
 specials_list = c.specials_list
 npc_list = {}
 shopkeeper_list = {}
@@ -53,7 +54,6 @@ class Shopkeeper:
             "Consumables": {},
             "Weapons": {},
             "Armor": {},
-            "Spells": {},
             "Key Items": {},
             "Materials": {}
         }
@@ -65,8 +65,6 @@ class Shopkeeper:
                     self.shop_inventory["Weapons"][item] = items_list[item]
                 if item in armor_list:
                     self.shop_inventory["Armor"][item] = items_list[item]
-                if item in specials_list:
-                    self.shop_inventory["Spells"][item] = items_list[item]
                 if item in keyitems_list:
                     self.shop_inventory["Key Items"][item] = items_list[item]
                 if item in materials_list:
@@ -194,4 +192,4 @@ Andre = Shopkeeper("Andre", "An old, grizzled blacksmith who's forged weapons an
 Malbras = Shopkeeper("Malbras", "The kind owner of the only tavern in Chalgos. He'll sell basic supplies and food necessary for adventuring.", 10, [], ["Chalgos"], [], ["Talk", "Quests", "Buy", "Sell", "Exit"], \
                     {"Meet": f"Hey there, you must be {p.player_name}, my name's Malbras, make yourself comfortable!", -100: "The only reason you can even show your face in here is because I can't afford a guard...", -60: "You're lucky I'm so lenient towards paying customers...", -10: "What'll it be today?", 30: f"Hey there {p.player_name}, what're ya lookin for today?", 60: f"Welcome in {p.player_name}! Make yourself right at home!"}, \
                     [["I'm the proud owner of this here fine tavern, we offer a variety of nutritious meals and even a few potions to get you back on your feet if need be.", "If there's anything you need just say the word and I'll have it right up for you! ... If you've got the money that is."]], \
-                    ["Consumables"], [1, 2], ["Hearty Stew", "Lesser Antidote"], ["Throwing Knife"])
+                    ["Consumables"], [1, 2], ["Hearty Stew", "Lesser Antidote", "Uppercut Scroll"], ["Throwing Knife"])

@@ -356,6 +356,15 @@ travel = Command("Travel", "Begin the journey to a different area")
 #             GAMEPLAY LOOP             #
 #########################################
 
+if f.capitalize(input("Do you want to skip the intro (Y/N)? ")) != "Y":
+    print(f"Welcome to the grand, fantastical land of Myravolt, a land of both danger and opportunity.", 3)
+    print(f"You are a young lad born in the quaint village of Chalgos, a secluded town in the middle of the Gavlynn Forest, and you've never known life outside it.", 4)
+    print(f"However, you've never been quite satisfied with this life, you yearn for adventure and glory.", 2.5)
+    print(f"So, armed with only your grandfather's old sword that he gave you on your 18th birthday, you decide today's finally the day you set off out into the great unknown...", 5)
+    p.player_name = input("Enter your name: ")
+    sleep(1)
+    print(f"Now go off into the lands of Myravolt {p.player_name}, and best of luck to you!", 4)
+
 while running == True:
     b.hpcheck(player)
     sleep(0.5)

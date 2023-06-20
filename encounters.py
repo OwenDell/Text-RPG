@@ -47,9 +47,9 @@ class FindItem:
     def __call__(self, area):
         potential_items = []
         for item in p.items_list:
-            if p.items_list[item].tier <= area.level and p.items_list[item].tier >= area.level-2 and p.items_list[item].slot == "Consumables":
-                potential_items.append(item)
-        chosen_item = random.choice(potential_items)
+            if p.items_list[item].tier <= area.level+1 and p.items_list[item].tier >= area.level-2 and p.items_list[item].slot == "Consumables":
+                potential_items.append([item, f.limit(p.items_list[item].lootweight-abs(p.items_list[item].tier-area.level), 10)])
+        chosen_item = f.weighted_random(potential_items)
         print(f"While exploring, you happened across a {chosen_item}!", 0.7)
         p.loot(p.items_list[chosen_item], 1)
 

@@ -262,10 +262,12 @@ class m_Use:
                         p.mana = p.mana + response.val1 if response.affect == "Mana" else p.mana
                         p.energy = p.energy + response.val1 if response.affect == "Energy" else p.energy
                         target.health = target.health - response.val1 if response.affect == "Damage" else target.health
+                        if response.affect == "Spell":
+                            player.moves[response.val1] = moves_list[response.val1]
                         if response.action == "Potion":
                             print(f"You drank a {response.name}.", 1)
                         else:
-                            print(f"{response.action[0]} {response.name}, {response.action[1]} {response.val1} {response.action[2]}.", 1.5)
+                            print(f"{response.action[0]} {response.name}, {response.action[1]} {response.val1}{response.action[2]}.", 1.5)
                     for eff in response.effects:
                         eff_target = player if eff[2] == "user" else target
                         statuses_list[eff[0]].apply(eff_target, eff[1])

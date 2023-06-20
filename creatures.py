@@ -86,7 +86,7 @@ for globals_object in temp_globals:
 #########################################
 
 player = Creature("Player", 1, 0, 100, 0, 0, {}, [], [], [], "You encountered... yourself?")
-goblin = Creature("Goblin", 1, 10, 50, 35, 5, [["Stab", 70], ["Claw", 30], ["Bite", 50]], [], [], [], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
+goblin = Creature("Goblin", 1, 10, 50, 35, 5, [["Stab", 30], ["Claw", 70], ["Bite", 50]], [], [], [], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
 wolf = Creature("Wolf", 2, 45, 150, 50, 10, [["Claw", 150], ["Bite", 80]], ["Fire"], [], [], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
 skeleton_archer = Creature("Skeletal Archer", 2, 50, 80, 60, 0, [["Punch", 35], ["Bowshot", 65]], ["Holy", "Blunt"], ["Slash", "Fire"], ["Dark"], "An arrow suddenly strikes the ground right between your legs, and as you turn around you see a skeletal archer in the process of knocking another arrow!")
 wwe_champ = Creature("WWE Champion", 5, 200, 200, 150, 10, [["Punch", 70], ["Uppercut", 30]], ["Slash"], ["Blunt"], [], "You approach a mysterious boxing ring as smoke fills up around you... just as you get the feeling you've arrived somewhere you shouldn't be you hear a bell ring and a burly man emerges from the fog looking ready for bloodshed.") #used for testing purposes

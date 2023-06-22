@@ -18,8 +18,60 @@ player = c.player
 moves_list = c.moves_list
 specials_list = c.specials_list
 statuses_list = s.statuses_list
-basic_attack = f.basic_attack
 battling = False #boolean for whether the player is currently engaged in combat, necessary for a few function checks.
+
+#########################################
+#          BACK-END FUNCTIONS           #
+#########################################
+
+def calculate_damage(move, user, target, weapon, print_crit=False): #calculates the amount of damage to be done to a target based on multiple factors such as the move, the users damage affinity multipliers, the users weapon, and critical hit bonuses
+    if weapon.name == "Empty":
+        damage = move.damage
+        if move.damagetype in target.weaknesses:
+            damage = damage*1.5*user.damage_affinities[move.damagetype]
+            #print(f"{move.damagetype}: Weakness! ({damage} dmg)")
+        elif move.damagetype in target.resistances:
+            damage = damage*0.5*user.damage_affinities[move.damagetype]
+            #print(f"{move.damagetype}: Resistance! ({damage} dmg)")
+        elif move.damagetype in target.immunities:
+            damage = damage*0*user.damage_affinities[move.damagetype]
+            #print(f"{move.damagetype}: Immune! ({damage} dmg)")
+        else:
+            #print(f"{move.damagetype}: Standard! ({damage} dmg)")
+            damage = damage*1*user.damage_affinities[move.damagetype]
+            pass
+    else:
+        damage = 0
+        for i, dmg in enumerate(weapon.damages):
+            bonus = 0
+            if dmg == move.damagetype:
+                bonus += move.bonusdamage
+            elif i <= 3:
+                continue
+            if dmg in target.weaknesses:
+                damage += (weapon.damages[dmg]+bonus)*1.5*user.damage_affinities[dmg]
+                #print(f"{dmg}: Weakness! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1.5} dmg)")
+            elif dmg in target.resistances:
+                damage += (weapon.damages[dmg]+bonus)*0.5*user.damage_affinities[dmg]
+                #print(f"{dmg}: Resistance! ({weapon.damages[dmg]}->{weapon.damages[dmg]*.5} dmg)")
+            elif dmg in target.immunities:
+                damage += (weapon.damages[dmg]+bonus)*0*user.damage_affinities[dmg]
+                #print(f"{dmg}: Immunity! ({weapon.damages[dmg]}->{weapon.damages[dmg]*0} dmg)")
+            else:
+                damage += (weapon.damages[dmg]+bonus)*1*user.damage_affinities[dmg]
+                #print(f"{dmg}: Standard! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1} dmg)")
+    damage = round(damage)
+    critchance = move.critchance+weapon.critchance+p.effective_dexterity if user is player else move.critchance+weapon.critchance
+    if random.randint(0, 100) <= critchance and move.critchance != -1:
+        returnval = [round(damage*weapon.critmultiplier), " (CRITICAL HIT)"] if print_crit == True else round(damage*weapon.critmultiplier)
+    else:
+        returnval = [damage, ""] if print_crit == True else damage
+    return returnval
+
+def basic_attack(move, user, target, weapon, message=f"the attacker attacked"): #used for both creature and player attacks that don't have any special functions to them, and simply do damage.
+        damage, critmsg = calculate_damage(move, user, target, weapon, True)
+        target.health -= damage
+        print(f"{message}, dealing {damage} damage!{critmsg}")
 
 #########################################
 #               CLASSES                 #
@@ -53,7 +105,8 @@ class Attack: #class for every basic attack in the game used by both enemies and
         global moves_list
         weapon = self.associated_weapon if user is player else p.empty #the associated weapon will always be empty for enemies
         message = ["You", f"the {target.name}"] if user is player else [f"The {user.name}", "You"]
-        if (random.randint(0, 100) <= (self.accuracy+weapon.accuracy)-target.evasion and target.evasion != -1) or self.accuracy == -1: #-1 accuracy means the move is unmissable, and takes precedence over the targets -1 evasion, which means the target is unhittable.
+        accuracy = self.accuracy+weapon.accuracy+(p.effective_dexterity*2) if user is player else self.accuracy+weapon.accuracy
+        if (random.randint(0, 100) <= (accuracy)-target.evasion and target.evasion != -1) or self.accuracy == -1: #-1 accuracy means the move is unmissable, and takes precedence over the targets -1 evasion, which means the target is unhittable.
             if len(self.special) <= 0:
                 basic_attack(self, user, target, weapon, f"{message[0]} {self.verb} {message[1]}")
             else:
@@ -143,6 +196,23 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
         player.cures_list["Saturated"] = True
     s.cure_check(player)
     s.cure_check(target)
+    c.level_up()
+    player.maxHP = 100+20*p.effective_vitality
+    p.maxMana = 20+(10*(p.effective_faith+p.effective_intelligence))
+    p.maxEnergy = 100+(10*p.effective_dexterity)
+    player.evasion = 2*p.effective_dexterity
+    player.damage_affinities = {
+        "Physical": 1+(.1*p.effective_strength),
+        "Slash": 1+(.1*p.effective_strength),
+        "Pierce": 1+(.1*p.effective_strength),
+        "Blunt": 1+(.1*p.effective_strength),
+        "Magic": 1+(.2*p.effective_intelligence),
+        "Fire": 1+(.1*p.effective_faith)+(.1*p.effective_intelligence),
+        "Lightning": 1+(.2*p.effective_faith),
+        "Holy": 1+(.2*p.effective_faith),
+        "Dark": 1+(.2*p.effective_intelligence),
+        "True": 1
+    }
     player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])
     if player.health <= 0:
         sleep(0.3)
@@ -224,7 +294,7 @@ class m_Options: #prints a list of all available moves and actions the player ca
             print(player.moves[i], 0.2)
         f.header("", 0.5)
     
-class m_Flee: #instantly flees from combat, in the future there will only be a chance to flee based on the player and targets stats.
+class m_Flee: #Attempts to flee from combat, odds of success is 50% chance + the players evasion - the enemies evasion.
     def __init__(self):
         self.name = "Flee"
         global moves_list
@@ -236,8 +306,11 @@ class m_Flee: #instantly flees from combat, in the future there will only be a c
         
     def __call__(self, player, target):
         global battling
-        battling = False
-        print(f"You fled from the enemy {target.name}!")
+        if random.randint(0, 100) <= 50+(player.evasion-target.evasion):
+            battling = False
+            print(f"You successfully fled combat from the enemy {target.name}!", 2)
+        else:
+            print(f"You tried to escape the enemy {target.name}, but they caught you!", 2)
            
 class m_Use: #use a consumable item, which can be something simple that affects mana, energy, or health, or something more complex that applies a status effect.
     def __init__(self):
@@ -257,7 +330,7 @@ class m_Use: #use a consumable item, which can be something simple that affects 
             if response.quantity >= 1:
                 if response.affect == "Damage" and target is player:
                     print(f"You can't use a {response.name} on yourself!", 0.7)
-                elif (random.randint(0, 100) <= response.accuracy-target.evasion and target.evasion != -1) or response.accuracy == -1:
+                elif (random.randint(0, 100) <= response.accuracy+(p.effective_dexterity*2)-target.evasion and target.evasion != -1) or response.accuracy == -1:
                     response.quantity -= 1
                     if response.affect != "":
                         player.health = player.health + response.val1 if response.affect == "Health" else player.health
@@ -266,6 +339,7 @@ class m_Use: #use a consumable item, which can be something simple that affects 
                         target.health = target.health - response.val1 if response.affect == "Damage" else target.health
                         if response.affect == "Spell":
                             player.moves[response.val1] = moves_list[response.val1]
+                            moves_list[response.val1].learned = True
                         if response.action == "Potion":
                             print(f"You drank a {response.name}.", 1)
                         else:
@@ -324,8 +398,9 @@ class s_Uppercut:
 class s_Bowshot: #in the future, make a separate bowshot MOVE for the player, where they choose what arrow to shoot and what effects it has.
     def __init__(self):
         self.name = "Bowshot"
-        self.damage = 40
+        self.damage = 30
         self.damagetype = "Pierce"
+        self.critchance = -1
         self.accuracy = 50
         specials_list[self.name] = self
         
@@ -336,13 +411,13 @@ class s_Bowshot: #in the future, make a separate bowshot MOVE for the player, wh
         global moves_list
         hit_chance = random.randint(0, 100)
         if hit_chance+30 <= self.accuracy-target.evasion and target.evasion != -1:
-            damage_dealt = round(self.damage*1.2)
+            damage_dealt = round(calculate_damage(self, user, target, weapon)*1.2)
             print(f"{message[0]} headshot {message[1]} with an arrow, dealing {damage_dealt} damage!")
         elif hit_chance <= self.accuracy-target.evasion and target.evasion != -1:
-            damage_dealt = self.damage
+            damage_dealt = calculate_damage(self, user, target, weapon)
             print(f"{message[0]} struck {message[1]} with an arrow, dealing {damage_dealt} damage!")
         elif hit_chance-30 <= self.accuracy-target.evasion and target.evasion != -1:
-            damage_dealt = round(self.damage*.3)
+            damage_dealt = round(calculate_damage(self, user, target, weapon)*.3)
             print(f"{message[0]} grazed {message[1]} with an arrow, dealing {damage_dealt} damage!")
         else:
             damage_dealt = 0

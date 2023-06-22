@@ -1,12 +1,20 @@
 # Changelog
 
-## Version a0.2.3.2 (IN PROGRESS)
+## Version a0.2.4 (6/22/23)
 - Added changelog :)
 - Added spell scroll consumable system
 - Added item rarity system
 - Added better documentation
 - Cleaned up a few vestiges in the code
 - The game will now end upon death
+- Added level up system
+- Added Faith and Vitality stats
+- Added functionality to all stats
+- Fleeing is now luck based and not guaranteed
+- Fixed bug that caused learned moves to be unlearned after swapping weapons
+- Rebalanced XP gain values for most enemies
+- Adjusted damage of bowshot move and gave it damage type functionality
+- Well Fed buff now provides bonus Vitality instead of Intelligence
 
 ## Update a0.2.3 (6/18/23)
 - Added current and planned features list to README file

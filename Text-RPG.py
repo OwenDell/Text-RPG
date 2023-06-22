@@ -27,6 +27,7 @@ heal = b.heal
 dummy = c.wwe_champ #Used with the fight developer command, stores a 'dummy' version of an enemy that can be changed out with the set_dummy command to make testing specific enemies easy
 fight = b.fight
 loot = p.loot
+level_up = c.level_up
 commands_list = {} #Dictionary of all front-end commands that the player can enter, using the Command class
 p.current_area = a.chalgos
 test_iteration = 1 #used for the run_test function, that keeps track of how many tests have been run during this instance of the program.
@@ -47,6 +48,8 @@ def converter(*args): #converts string inputs into either global objects, intege
             args[index] = float(parameter[3:])
         elif "/L/" in parameter[:3].upper():
             args[index] = parameter[3:].split()
+        elif "/B/" in parameter[:3].upper():
+            args[index] = True if parameter[3:] == "True" else False
         else:
             pass
     return args
@@ -55,6 +58,7 @@ def learn_move(move_name): #adds a new move to the player.moves dictionary. Main
     move_name = f.capitalize(move_name)
     try:
         player.moves[move_name] = moves_list[move_name]
+        moves_list[move_name].learned = True
         print(f"You learned {move_name}!", 0.15)
     except:
         print(f"Unrecognized move: \'{move_name}\'.", 0.5)
@@ -186,12 +190,16 @@ def f_stats(): #prints out current information about the player
     print(f"Mana: {p.mana}/{p.maxMana}", 0.3)
     print(f"Energy: {p.energy}/{p.maxEnergy}", 0.3)
     print(f"Gold: {player.gold}", 0.3)
+    operator = "+" if p.effective_vitality-p.vitality >= 0 else ""
+    print(f"Vitality: {p.vitality} ({operator}{p.effective_vitality-p.vitality})", 0.3)
     operator = "+" if p.effective_strength-p.strength >= 0 else ""
     print(f"Strength: {p.strength} ({operator}{p.effective_strength-p.strength})", 0.3)
     operator = "+" if p.effective_dexterity-p.dexterity >= 0 else ""
     print(f"Dexterity: {p.dexterity} ({operator}{p.effective_dexterity-p.dexterity})", 0.3)
     operator = "+" if p.effective_intelligence-p.intelligence >= 0 else ""
     print(f"Intelligence: {p.intelligence} ({operator}{p.effective_intelligence-p.intelligence})", 0.3)
+    operator = "+" if p.effective_faith-p.faith >= 0 else ""
+    print(f"Faith: {p.faith} ({operator}{p.effective_faith-p.faith})", 0.3)
     print(f"Speed: {p.speed}%", 0.3)
     f.header("", 0.5)
 
@@ -219,7 +227,8 @@ def f_equipment(): #prints out the players currently equipped gear, as well as a
                 print(f"Crit Damage Multiplier: {response.critmultiplier*100}%", 0.3)
                 print(f"\nDamage Types:\n", 1)
                 for dmg in response.damages:
-                    print(f"{dmg}: {response.damages[dmg]}", 0.3)
+                    operator = "+" if (response.damages[dmg]*player.damage_affinities[dmg])-response.damages[dmg] >= 0 else ""
+                    print(f"{dmg}: {response.damages[dmg]} ({operator}{round((response.damages[dmg]*player.damage_affinities[dmg])-response.damages[dmg], 1)})", 0.3)
                 print(f"\nWeapon Moves:\n", 1)
                 for move in response.moves:
                     print(moves_list[move], 0.3)
@@ -352,7 +361,7 @@ travel = Command("Travel", "Begin the journey to a different area")
 #             GAMEPLAY LOOP             #
 #########################################
 
-if f.capitalize(input("Do you want to skip the intro (Y/N)? ")) != "Y": #the story intro to the game and where the player chooses their name, gives the player the chance to skip it if they want, doing so defaults the player name to "Nick"
+if f.capitalize(input("Do you want to skip the intro (Y/N)? ")) != "Y": #the story intro to the game and where the player chooses their name, gives the player the chance to skip it if they want, doing so defaults the player name to "Henry"
     sleep(1)
     print(f"Welcome to the grand, fantastical land of Myravolt, a land of both danger and opportunity.", 4.5)
     print(f"You are a young lad born in the quaint village of Chalgos, a secluded town in the middle of the Gavlynn Forest, and you've never known life outside it.", 6)
@@ -372,7 +381,8 @@ while running == True and player.health > 0: #the main gameplay loop, the player
             activities_list[response](p.current_area)
         else:
             commands_list[response]()
-    except:
+    except Exception as e:
+        print(e)
         print(f"Response \'{response}\' not recognized. Try \'Commands\' for a list of valid options.")
         
 print("Game has ended.")

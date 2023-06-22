@@ -27,20 +27,26 @@ spell_action = ["You read a", "and learned the move", ""]
 #                STATS                  #
 #########################################
 
-player_name = "Nick" #The players name, some NPC's will refer to the player by their name, and it shows up in a few other places. Mainly just intended to make the player feel more invested in the world. Defaults to "Nick" if the player chooses to skip the intro.
+player_name = "Henry" #The players name, some NPC's will refer to the player by their name, and it shows up in a few other places. Mainly just intended to make the player feel more invested in the world. Defaults to "Henry" if the player chooses to skip the intro.
 current_area = "Chalgos" #Tracks the players current area
 position = 0 #Tracks the players current position, which affects their current area
 mana = 20 #How much mana the player currently has
 maxMana = 20 #The players maximum mana
 energy = 100 #How much energy the player currently has
 maxEnergy = 100 #The players maximum energy
-reqXP = 250 #The required amount of XP to level up, this will increase with each level
-strength = 1 #The players real stats, this is only increased through level ups.
-dexterity = 1
-intelligence = 1
-effective_strength = 1 #The players effective stats, which can change from things like statuses or equipment bonuses, and is what's used for all calculations, but is stored separately from the real stats so it knows what to revert to when those bonuses end.
-effective_dexterity = 1
-effective_intelligence = 1
+reqXP = 150 #The required amount of XP to level up, this will increase with each level
+#The players real stats, this is only increased through level ups:
+vitality = 0 #Dictates health, every point of vitality is +20 maxHP
+strength = 0 #Dictates physical damage and affects skill checks
+dexterity = 0
+intelligence = 0
+faith = 0
+#The players effective stats, which can change from things like statuses or equipment bonuses, and is what's used for all calculations, but is stored separately from the real stats so it knows what to revert to when those bonuses end:
+effective_vitality = 0
+effective_strength = 0
+effective_dexterity = 0
+effective_intelligence = 0
+effective_faith = 0
 speed = 100 #The players speed, which is the number of meters of distance they move during each loop of travelling. This can be changed through various statuses or equipment bonuses.
 equipment = { #The players equipment slots, which will be updated throughout the game as the player acquires and swaps out new pieces of equipment.
     "Mainhand": "Empty",
@@ -104,7 +110,8 @@ class weapon: #for equipment, store every piece of equipment in equipment_list. 
             "Fire": damages[5],
             "Lightning": damages[6],
             "Holy": damages[7],
-            "Dark": damages[8]
+            "Dark": damages[8],
+            "True": damages[9]
         }
         items_list[self.name] = self
         equipment_list[self.name] = self
@@ -138,11 +145,11 @@ def loot(item, quantity=1): #Used when the player loots an item and adds it to t
 #########################################
 
 #example_weapon = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark], accuracy, critchance, critmultiplier, moves, lootweight)
-empty = weapon("Special", "Empty", "You don't have anything equipped in this slot", -1, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, [], 0)
-bronze_short_sword = weapon("Mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days..", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab"], 0)
-spiked_club = weapon("Both", "Spiked Club", "A crude wooden club with iron nails in it", 1, 0, 70, [25, 15, 20, 30, 0, 0, 0, 0, 0], -5, -10, 1.5, ["Bash"], 7)
-iron_dagger = weapon("Offhand", "Iron Dagger", "A simple iron dagger that's effective at targeting weak spots for critical blows", 2, 0, 125, [15, 15, 25, 5, 0, 0, 0, 0, 0], 10, 10, 2, ["Slash", "Stab"], 6)
-flaming_sword = weapon("Mainhand", "Flaming Sword", "An enchanted iron sword that is constantly ablaze", 4, 0, 300, [20, 30, 25, 15, 0, 25, 0, 0, 0], 5, 0, 1.75, ["Slash", "Stab"], 3)
+empty = weapon("Special", "Empty", "You don't have anything equipped in this slot", -1, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, [], 0)
+bronze_short_sword = weapon("Mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days..", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab"], 0)
+spiked_club = weapon("Both", "Spiked Club", "A crude wooden club with iron nails in it", 1, 0, 70, [25, 15, 20, 30, 0, 0, 0, 0, 0, 0], -5, -10, 1.5, ["Bash"], 7)
+iron_dagger = weapon("Offhand", "Iron Dagger", "A simple iron dagger that's effective at targeting weak spots for critical blows", 2, 0, 125, [15, 15, 25, 5, 0, 0, 0, 0, 0, 0], 10, 10, 2, ["Slash", "Stab"], 6)
+flaming_sword = weapon("Mainhand", "Flaming Sword", "An enchanted iron sword that is constantly ablaze", 4, 0, 300, [20, 30, 25, 15, 0, 25, 0, 0, 0, 0], 5, 0, 1.75, ["Slash", "Stab"], 3)
 
 #########################################
 #              INVENTORY                #

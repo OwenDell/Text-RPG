@@ -123,9 +123,11 @@ class Standard_Effect: #Class for basic, formulaic effects while still being ext
         p.mana = operators[self.operator](p.mana, self.amount) if self.affect == "Mana" else p.mana
         p.energy = operators[self.operator](p.energy, self.amount) if self.affect == "Energy" else p.energy
         player.gold = operators[self.operator](player.gold, self.amount) if self.affect == "Gold" else player.gold
+        p.effective_vitality = operators[self.operator](p.effective_vitality, self.amount) if self.affect == "Vitality" else p.effective_vitality
         p.effective_strength = operators[self.operator](p.effective_strength, self.amount) if self.affect == "Strength" else p.effective_strength
         p.effective_dexterity = operators[self.operator](p.effective_dexterity, self.amount) if self.affect == "Dexterity" else p.effective_dexterity
         p.effective_intelligence = operators[self.operator](p.effective_intelligence, self.amount) if self.affect == "Intelligence" else p.effective_intelligence
+        p.effective_faith = operators[self.operator](p.effective_faith, self.amount) if self.affect == "Faith" else p.effective_faith
         p.speed = operators[self.operator](p.speed, self.amount) if self.affect == "Speed" else p.speed
 
 class Apply_Cure: #Simple class for cure effects, necessary for consumable items that apply a cure such as an antidote.
@@ -161,9 +163,9 @@ def cure_check(target, cure_all=False): #checks if any of the cure conditions ar
 #               STATUSES                #
 #########################################
 
-exhaustion = Status("Exhaustion", "You're completely out of Energy and have worse stats as a result", ["-1 Strength", "-1 Dexterity", "-1 Intelligence", "-50 Speed"], [], ["+1 Strength", "+1 Dexterity", "+1 Intelligence", "+50 Speed"], ["+1 Strength", "+1 Dexterity", "+1 Intelligence", "+50 Speed"], ["Saturated"])
+exhaustion = Status("Exhaustion", "You're completely out of Energy and have worse stats as a result", ["-1 Strength", "-1 Dexterity", "-1 Vitality", "-50 Speed"], [], ["+1 Strength", "+1 Dexterity", "+1 Vitality", "+50 Speed"], ["+1 Strength", "+1 Dexterity", "+1 Vitality", "+50 Speed"], ["Saturated"])
 lesser_poison = Status("Lesser Poison", "A minor poison that deals 10 damage per turn", [], ["Poison 1"], [], [], ["Lesser Antidote", "Cleanse"])
-well_fed = Status("Well Fed", "Increases your Strength, Dexterity, and Intelligence by 1", ["+1 Strength", "+1 Dexterity", "+1 Intelligence"], [], ["-1 Strength", "-1 Dexterity", "-1 Intelligence"], ["-1 Strength", "-1 Dexterity", "-1 Intelligence"], [])
+well_fed = Status("Well Fed", "Increases your Strength, Dexterity, and Vitality by 1", ["+1 Strength", "+1 Dexterity", "+1 Vitality"], [], ["-1 Strength", "-1 Dexterity", "-1 Vitality"], ["-1 Strength", "-1 Dexterity", "-1 Vitality"], [])
 minor_doom = Status("Minor Doom", "Your doom is imminent... you'll take 30 damage soon..", [], [], ["Doom 1"], [], ["Victory", "Cleanse"])
 lesser_antidote = Status("Lesser Antidote", "Makes you immune to lesser poisons", ["Lesser Antidote"], ["Lesser Antidote"], [], [], [])
 antidote = Status("Antidote", "Makes you immune to common poisons", ["Lesser Antidote", "Antidote"], ["Lesser Antidote", "Antidote"], [], [], [])
@@ -175,12 +177,16 @@ cleanse = Status("Cleanse", "Makes you immune to almost any ailment", ["Cleanse"
 
 poison1 = Standard_Effect("Poison 1", 2, "poison", 10, "Health", "-")
 doom1 = Standard_Effect("Doom 1", 2, "doom", 50, "Health", "-")
+vitality_up1 = Standard_Effect("+1 Vitality", 3, "increased", 1, "Vitality", "+")
+vitality_down1 = Standard_Effect("-1 Vitality", 3, "decreased", 1, "Vitality", "-")
 strength_up1 = Standard_Effect("+1 Strength", 3, "increased", 1, "Strength", "+")
 strength_down1 = Standard_Effect("-1 Strength", 3, "decreased", 1, "Strength", "-")
 dexterity_up1 = Standard_Effect("+1 Dexterity", 3, "increased", 1, "Dexterity", "+")
 dexterity_down1 = Standard_Effect("-1 Dexterity", 3, "decreased", 1, "Dexterity", "-")
 intelligence_up1 = Standard_Effect("+1 Intelligence", 3, "increased", 1, "Intelligence", "+")
 intelligence_down1 = Standard_Effect("-1 Intelligence", 3, "decreased", 1, "Intelligence", "-")
+faith_up1 = Standard_Effect("+1 Faith", 3, "increased", 1, "Faith", "+")
+faith_down1 = Standard_Effect("-1 Faith", 3, "decreased", 1, "Faith", "-")
 speed_up50 = Standard_Effect("+50 Speed", 3, "increased", 50, "Speed", "+")
 speed_down50 = Standard_Effect("-50 Speed", 3, "decreased", 50, "Speed", "-")
 

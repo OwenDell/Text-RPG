@@ -53,7 +53,8 @@ class Creature: #The class for all creatures, including the player. Using the sa
             "Fire": 1,
             "Lightning": 1,
             "Holy": 1,
-            "Dark": 1
+            "Dark": 1,
+            "True": 1
         }
         enemies.append(self)
     
@@ -69,6 +70,57 @@ class Creature: #The class for all creatures, including the player. Using the sa
 
 def dummy_init(dummy): #Sets the dummy to any creature in the game so it can be fought using developer commands. Used for testing purposes.
     return globals()[dummy]
+
+def level_up(freelvl=False): #Checks to see if the player has the required amount of XP to level up (or bypasses that check if freelvl is True), and if so presents them the choice of 5 stats to level up. Each stat will have different bonuses for choosing to increase it. Afterwards, the amount of XP required for the next level is increased, the players current XP is decreased by the level up cost, and the players Health, Energy, and Mana is completely refilled.
+    if player.XP >= p.reqXP or freelvl == True:
+        player.level += 1
+        player.XP = player.XP - p.reqXP if freelvl != True else player.XP
+        p.reqXP = round(100*player.level*(1+(player.level*0.1)))
+        print(f"Level Up! You're now level {player.level} and can choose 1 main stat to increase.", 2)
+        while True:
+            f.header("Level Up", 0.5)
+            print(f"Vitality ({p.vitality}): Every level provides +20 Max HP", 0.5)
+            print(f"Strength ({p.strength}): Every level provides +10% Physical, Slash, Pierce, and Blunt Damage", 0.5)
+            print(f"Dexterity ({p.dexterity}): Every level provides +2% Evasion, +2% Accuracy, +1% Critical Chance, and +10 Max Energy", 0.5)
+            print(f"Intelligence ({p.intelligence}): Every level provides +20% Magic and Dark Damage, +10% Fire Damage, and +10 Max Mana", 0.5)
+            print(f"Faith ({p.faith}): Every level provides +20% Faith and Lightning Damage, +10% Fire Damage, and +10 Max Mana", 0.5)
+            f.header("", 0.5)
+            response = f.capitalize(input("What stat do you want to increase by 1 point? "))
+            sleep(0.5)
+            if response in ["Vitality", "Strength", "Dexterity", "Intelligence", "Faith"]:
+                p.vitality = p.vitality+1 if response == "Vitality" else p.vitality
+                p.dexterity = p.dexterity+1 if response == "Dexterity" else p.dexterity
+                p.strength = p.strength+1 if response == "Strength" else p.strength
+                p.intelligence = p.intelligence+1 if response == "Intelligence" else p.intelligence
+                p.faith = p.faith+1 if response == "Faith" else p.faith
+                p.effective_vitality = p.effective_vitality+1 if response == "Vitality" else p.effective_vitality
+                p.effective_dexterity = p.effective_dexterity+1 if response == "Dexterity" else p.effective_dexterity
+                p.effective_strength = p.effective_strength+1 if response == "Strength" else p.effective_strength
+                p.effective_intelligence = p.effective_intelligence+1 if response == "Intelligence" else p.effective_intelligence
+                p.effective_faith = p.effective_faith+1 if response == "Faith" else p.effective_faith
+                player.maxHP = (p.effective_vitality*20)+100
+                p.maxMana = ((p.effective_intelligence+p.effective_faith)*10)+100
+                p.maxEnergy = 100+(10*p.effective_dexterity)
+                player.evasion = 2*p.effective_dexterity
+                player.damage_affinities = {
+                    "Physical": 1+(.1*p.effective_strength),
+                    "Slash": 1+(.1*p.effective_strength),
+                    "Pierce": 1+(.1*p.effective_strength),
+                    "Blunt": 1+(.1*p.effective_strength),
+                    "Magic": 1+(.2*p.effective_intelligence),
+                    "Fire": 1+(.1*p.effective_faith)+(.1*p.effective_intelligence),
+                    "Lightning": 1+(.2*p.effective_faith),
+                    "Holy": 1+(.2*p.effective_faith),
+                    "Dark": 1+(.2*p.effective_intelligence),
+                    "True": 1
+                }
+                player.health = player.maxHP
+                p.mana = p.maxMana
+                p.energy = p.maxEnergy
+                print(f"You increased your {response} by 1!", 1.5)
+                break
+            else:
+                print("Invalid response, please enter one of the provided options.", 0.5)
 
 #########################################
 #            INITIALIZATION             #
@@ -86,9 +138,9 @@ for globals_object in temp_globals:
 #########################################
 
 player = Creature("Player", 1, 0, 100, 0, 0, {}, [], [], [], "You encountered... yourself?")
-goblin = Creature("Goblin", 1, 10, 50, 35, 5, [["Stab", 30], ["Claw", 70], ["Bite", 50]], [], [], [], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
-wolf = Creature("Wolf", 2, 45, 150, 50, 10, [["Claw", 150], ["Bite", 80]], ["Fire"], [], [], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
+goblin = Creature("Goblin", 1, 20, 50, 35, 5, [["Stab", 30], ["Claw", 70], ["Bite", 50]], [], [], [], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
+wolf = Creature("Wolf", 2, 50, 150, 50, 10, [["Claw", 150], ["Bite", 80]], ["Fire"], [], [], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
 skeleton_archer = Creature("Skeletal Archer", 2, 50, 80, 60, 0, [["Punch", 35], ["Bowshot", 65]], ["Holy", "Blunt"], ["Slash", "Fire"], ["Dark"], "An arrow suddenly strikes the ground right between your legs, and as you turn around you see a skeletal archer in the process of knocking another arrow!")
 wwe_champ = Creature("WWE Champion", 5, 200, 200, 150, 10, [["Punch", 70], ["Uppercut", 30]], ["Slash"], ["Blunt"], [], "You approach a mysterious boxing ring as smoke fills up around you... just as you get the feeling you've arrived somewhere you shouldn't be you hear a bell ring and a burly man emerges from the fog looking ready for bloodshed.") #used for testing purposes
 elusive_ghost = Creature("Elusive Ghost", 3, 100, 30, 55, 15, [["Punch", 40], ["Claw", 40], ["Slash", 20]], ["Holy", "Magic"], ["Dark", "Fire"], ["Physical", "Slash", "Pierce", "Blunt"], "A swirling mist ahead of you congeals into a spectral figure... it's an elusive ghost! They can't be damaged by normal means!")
-bandit = Creature("Bandit", 2, 25, 70, 50, 0, [["Stab", 50], ["Slash", 70], ["Bowshot", 20], ["Punch", 30]], [], [], [], "As your walking along a dirt path a grizzled man jumps out from behind a tree in front of you! 'Surrender your posessions or die!' he shouts at you. He gives you a mean snear as you draw your weapon...")
+bandit = Creature("Bandit", 2, 35, 70, 50, 0, [["Stab", 50], ["Slash", 70], ["Bowshot", 20], ["Punch", 30]], [], [], [], "As your walking along a dirt path a grizzled man jumps out from behind a tree in front of you! 'Surrender your posessions or die!' he shouts at you. He gives you a mean snear as you draw your weapon...")

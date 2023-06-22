@@ -11,10 +11,10 @@ This is a new attempt at the same formula I did ~2 years ago in C#, being a cycl
 - Status effects that can be applied to both the player and enemies which can be cured through various methods
 - An elemental damage type system that incorporates weaknesses and resistances to different elements
 - A shop system through various shopkeepers that offer different wares and must be found by venturing to new towns
+- An XP and level up system that allows the player to improve various stats
 
 ## Planned Features:
 - An activities system that allows the player to perform various activities while venturing out in the wilds
-- An XP and level up system that allows the player to improve various stats
 - A new type of area called 'Dungeons' where the player will progress deeper into them before encountering a boss
 - A progressive dialogue and relations system with numerous NPC's that will affect how they treat you and what opportunities they offer
 - A quest system where various NPC's will offer tasks and quests to the player

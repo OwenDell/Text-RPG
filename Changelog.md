@@ -1,6 +1,16 @@
 # Changelog
 
-## Version a0.2.4 (6/22/23)
+## Update a0.2.5 (6/23/23)
+- Changed the way status effects work on the back-end to be more modular; no difference to gameplay
+- Changed the way damage resistances work so they can now come in varying degrees of resistance as opposed to just weak, resistant, immune, or standard
+- Added encyclopedia system
+- Added armor system
+- Added buffs system
+- Added encyclopedia command
+- Added a few new armor pieces
+- Added a few new buffs
+
+## Update a0.2.4 (6/22/23)
 - Added changelog :)
 - Added spell scroll consumable system
 - Added item rarity system
@@ -17,7 +27,7 @@
 - Well Fed buff now provides bonus Vitality instead of Intelligence
 
 ## Update a0.2.3 (6/18/23)
-- Added current and planned features list to README file
+- Added current and planned features list to README.md
 - Added NPC system
 - Added dialogue system
 - Added reputation system

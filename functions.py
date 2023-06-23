@@ -13,6 +13,19 @@ printing = True #Boolean that works with the modified print function to determin
 sleeping = True #Boolean that works with the modified sleep function to determine if the game should be sleeping between lines of text or ignoring sleep commands.
 sleepmultiplier = 1 #Determines how quickly to progress through sleep commands between text, higher value means faster text. Can be changed by the player through the 'Settings' command.
 _print = print #The old print command is stored as '_print', just incase it's needed for some reason.
+encyclopedia = {
+    "Enemies": {},
+    "Weapons": {},
+    "Armor": {},
+    "Items": {},
+    "Moves": {},
+    "Characters": {},
+    "Areas": {},
+    "Stats": {},
+    "Mechanics": {},
+    "Tutorials": {}
+}
+check_encyclopedia = ""
 
 #########################################
 #          BACK-END FUNCTIONS           #

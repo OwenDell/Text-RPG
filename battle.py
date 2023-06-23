@@ -82,6 +82,7 @@ class Attack: #class for every basic attack in the game used by both enemies and
         weapon = self.associated_weapon if user is player else p.empty #the associated weapon will always be empty for enemies
         message = ["You", f"the {target.name}"] if user is player else [f"The {user.name}", "You"]
         accuracy = self.accuracy+weapon.accuracy+(p.effective_dexterity*2) if user is player else self.accuracy+weapon.accuracy
+        f.encyclopedia["Moves"][self.name] = self
         if (random.randint(0, 100) <= (accuracy)-target.evasion and target.evasion != -1) or self.accuracy == -1: #-1 accuracy means the move is unmissable, and takes precedence over the targets -1 evasion, which means the target is unhittable.
             if len(self.special) <= 0:
                 basic_attack(self, user, target, weapon, f"{message[0]} {self.verb} {message[1]}")
@@ -100,7 +101,7 @@ def player_move(target): #gets a move input from the player, checks if that move
     while True:
         response = f.capitalize(input(f"You have {player.health}/{player.maxHP} HP and {p.mana}/{p.maxMana} Mana, what do you do? "))
         sleep(0.5)
-        if response == "Options":
+        if response == "Options" or response == "Encyclopedia":
             moves_list[response](player, target)
         elif response in player.moves:
             try:
@@ -129,7 +130,7 @@ def fight(target): #starts a battle between the player and an enemy. The battle 
     battling = True
     turn_count = 1
     print(f"You begin battle with the enemy {target.name}!", 1.5)
-    target.met = True
+    f.encyclopedia["Enemies"][target.name] = target
     while True:
         f.header(f"Battle with {target.name}: Turn {turn_count}", 0.7)
         s.recur_statuses(player)
@@ -191,6 +192,16 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
         "True": 1
     }
     player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])
+    for item in p.items_list:
+        if p.items_list[item].quantity > 0:
+            if item in p.weapons_list:
+                f.encyclopedia["Weapons"][item] = p.items_list[item]
+            elif item in p.armor_list:
+                f.encyclopedia["Armor"][item] = p.items_list[item]
+            else:
+                f.encyclopedia["Items"][item] = p.items_list[item]
+    for move in player.moves:
+        f.encyclopedia["Moves"][move] = moves_list[move]
     if player.health <= 0:
         sleep(0.3)
         if battling == True:
@@ -210,7 +221,11 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
     if checkup == True:
         print(f"HP of {target.name}: {target.health}/{target.maxHP}")
 
-def equipment_swap(slot, equipment): #Goes through the procedure when the player swaps out a piece of equipment throught he equipment command. Removes any moves from the players move list that were tied to the old weapon, and gives any moves tied to the new one. 
+def equipment_swap(slot, equipment): #Goes through the procedure when the player swaps out a piece of equipment throught the equipment command. Removes any moves from the players move list that were tied to the old weapon, and gives any moves tied to the new one. 
+    for buff in p.equipment_list[equipment].buffs:
+        s.buffs_list[buff[0]].add(buff[1])
+    for buff in p.equipment_list[p.equipment[slot]].buffs:
+        s.buffs_list[buff[0]].remove(buff[1])
     if slot == "Mainhand" or slot == "Offhand" or slot == "Special":
         for attack in moves_list:
             try:
@@ -248,6 +263,10 @@ def equipment_swap(slot, equipment): #Goes through the procedure when the player
                         break
                     else:
                         print("Invalid response, please enter one of the provided options. (You can also respond with the corresponding number to quickly choose a response)", 1)
+    else:
+        for resistance in player.damage_resistances:
+            player.damage_resistances[resistance] += p.equipment_list[equipment].resistances[resistance]
+            player.damage_resistances[resistance] -= p.equipment_list[p.equipment[slot]].resistances[resistance]
     p.equipment[slot] = equipment
 
 #########################################
@@ -270,6 +289,20 @@ class m_Options: #prints a list of all available moves and actions the player ca
         for i in player.moves:
             print(player.moves[i], 0.2)
         f.header("", 0.5)
+
+class m_Encyclopedia: #prints a list of all available moves and actions the player can take in combat. Does not use up the players turn.
+    def __init__(self):
+        self.name = "Encyclopedia"
+        global moves_list
+        moves_list[self.name] = self
+        player.moves[self.name] = moves_list[self.name]
+        
+    def __str__(self):
+        return f"{self.name}: Views the encylopedia entry of the target enemy."
+        
+    def __call__(self, player, target):
+        global moves_list
+        f.check_encyclopedia(target.name, "Enemies")
     
 class m_Flee: #Attempts to flee from combat, odds of success is 50% chance + the players evasion - the enemies evasion.
     def __init__(self):
@@ -418,7 +451,7 @@ punch = Attack(True, "Punch", "A quick punch with your fist", 10, 3, "Blunt", 11
 slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, 3, "Slash", 100, 15, 0, 0, "slashed", "")
 stab = Attack(False, "Stab", "A piercing jab with your weapon", 25, 5, "Pierce", 85, 20, 0, 0, "stabbed", "")
 bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, 3, "Blunt", 95, 5, 0, 0, "bashed", "")
-uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 20, "Blunt", 80, 10, 10, 0, "delivered a devastating uppercut to", "Uppercut")
+uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 20, "Blunt", 80, 20, 10, 0, "delivered a devastating uppercut to", "Uppercut")
 execute = Attack(False, "Execute", "You delete the enemy from existence", -1, 999999, "Physical", -1, 0, 0, 0, "executed", "Execute")
 claw = Attack(False, "Claw", "A painful slash with your claws", 10, 10, "Slash", 90, 15, 0, 0, "clawed", "")
 bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 15, "Pierce", 85, 10, 0, 0, "bit", "")

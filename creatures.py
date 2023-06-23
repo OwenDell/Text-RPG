@@ -65,11 +65,10 @@ class Creature: #The class for all creatures, including the player. Using the sa
             "Dark": resistances[8],
             "True": resistances[9]
         }
-        self.met = False
         enemies.append(self)
     
     def __str__(self):
-        return f"Lvl: {self.level} {self.name}, with {self.health} HP!"
+        return f"Lvl: {self.level} {self.name}, with {self.health} HP."
         
     def creature_attack(self, target): #randomly chooses an attack from the creatures attack pool. Takes into account the chance of the move to be chosen out of the total pool.
         moves_list[f.weighted_random(self.moves)](self, target)

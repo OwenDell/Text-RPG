@@ -22,18 +22,6 @@ mana_potion_action = ["You drank a", "restoring", " Mana"]
 food_action = ["You ate a", "restoring", " Energy"]
 damage_action = ["You used a", "dealing", " damage"]
 spell_action = ["You read a", "and learned the move", ""]
-encyclopedia = {
-    "Enemies": {},
-    "Weapons": {},
-    "Armor": {},
-    "Items": {},
-    "Moves": {},
-    "Characters": {},
-    "Areas": {},
-    "Stats": {},
-    "Mechanics": {},
-    "Tutorials": {}
-}
 
 #########################################
 #                STATS                  #
@@ -65,13 +53,14 @@ equipment = { #The players equipment slots, which will be updated throughout the
     "Offhand": "Empty",
     "Special": "Empty",
     "Helmet": "None",
-    "Armor": "None",
+    "Chest": "None",
     "Leggings": "None",
     "Boots": "None",
     "Gloves": "None",
     "Ring": "None",
     "Amulet": "None"
 }
+xp_gain_multiplier = 1
 
 #########################################
 #               CLASSES                 #
@@ -96,12 +85,14 @@ class item: #for regular items, usually consumables.
         items_list[self.name] = self
         if slot == "Consumables":
             consumables_list[self.name] = self
+        if quantity > 0:
+            f.encyclopedia["Items"][self.name] = self
 
     def __str__(self):
         return f"{self.name}: {self.description}. ({self.quantity} owned)"
 
 class weapon: #for equipment, store every piece of equipment in equipment_list. The player can collect duplicates of gear that is stored in quantity, make function allowing player to swap out equipment of same {slot}, which decrements the quantity value of newly equipped item by 1 and increments quantity of swapped out equipment by 1. Therefore equipped items do not show up in equipment_list to make it easier to restrict player from selling equipped gear or something like that.
-    def __init__(self, slot, name, description, tier, quantity, value, damages, accuracy, critchance, critmultiplier, moves, lootweight):
+    def __init__(self, slot, name, description, tier, quantity, value, damages, accuracy, critchance, critmultiplier, moves, buffs, lootweight):
         self.slot = slot #The slot for the equipment, in the case of weapons, either "mainhand", "offhand", "both", or "special". Most weapons will be equipped in either the mainhand or offhand, ones with both are either 2-hand weapons or dual wield weapons that take up both slots, and special is for special weapons that don't take up a weapon slot, maybe something like a floating magic orb idk
         self.name = name #The name of the piece of equipment
         self.description = description #The description, should be fairly brief and not go into statiscal detail, as that can be viewed with the equipment 'inspect' feature that gives the detailed stats
@@ -112,8 +103,9 @@ class weapon: #for equipment, store every piece of equipment in equipment_list. 
         self.critchance = critchance #The ADDITIONAL crit chance this weapon applies to moves. The baseline for this is 0, as any value other than 0 is added on to the crit chance for moves, and is not a multiplier
         self.critmultiplier = critmultiplier #The damage multiplier applied when a critical hit is performed, the baseline should be 1.5x
         self.moves = moves #The list of moves that this weapon has. The player will have access to every move of their currently equipped weapon, and those moves will be automatically unlearnt when the player unequips the weapon
+        self.buffs = buffs #List of buffs which come in the form of 2 part lists, with the 1st part being what it affects, and the 2nd part being by how much. Buffs only apply while this piece of equipment is actively equipped.
         self.lootweight = lootweight #The weighted odds on a 1-10 scale of finding this item, higher number means higher odds of finding it compared to other potential items in the same lootpool
-        self.damages = { #A dictionary of the damage types this weapon does as the keys with the associated base damage value for each damage type as the value. Moves will pick one of the 3 damage physical damage types, or default to the "Physical", damage value, and then add on any of the elemental damage types. This means every weapon must either have a value for all of the first 4 damage values, and then the rest can be 0 as those will be adde don.
+        self.damages = { #A dictionary of the damage types this weapon does as the keys with the associated base damage value for each damage type as the value. Moves will pick one of the 3 damage physical damage types, or default to the "Physical", damage value, and then add on any of the elemental damage types. This means every weapon must either have a value for all of the first 4 damage values, and then the rest can be 0 as those will be added on.
             "Physical": damages[0], #Standard physical damage type if none of the other 3 physical damage types apply. Other 3 are prioritized however and it should primarily be 1 of those 3 that are used.
             "Slash": damages[1], #Effective against fleshy & unarmored targets, but less effective against hard & armored ones
             "Pierce": damages[2], #Effective against lightly armored targets, less effective against heavily armored ones
@@ -128,10 +120,43 @@ class weapon: #for equipment, store every piece of equipment in equipment_list. 
         items_list[self.name] = self
         equipment_list[self.name] = self
         weapons_list[self.name] = self
+        if quantity > 0:
+            f.encyclopedia["Weapons"][self.name] = self
 
     def __str__(self):
         return f"{self.name}: {self.description}. ({self.quantity} owned)"
-
+    
+class armor:
+    def __init__(self, slot, name, description, tier, quantity, value, resistances, buffs, lootweight):
+        self.slot = slot #The slot for the equipment, in the case of weapons, either "mainhand", "offhand", "both", or "special". Most weapons will be equipped in either the mainhand or offhand, ones with both are either 2-hand weapons or dual wield weapons that take up both slots, and special is for special weapons that don't take up a weapon slot, maybe something like a floating magic orb idk
+        self.name = name #The name of the piece of equipment
+        self.description = description #The description, should be fairly brief and not go into statiscal detail, as that can be viewed with the equipment 'inspect' feature that gives the detailed stats
+        self.tier = tier #The tier of the equipment, used to determine where it belongs in loot pools and to give a quick and easy reference for its quality
+        self.quantity = quantity #How many the player owns, should be 0 for everything that the player doesn't start with. The player will be able to collect duplicates of equipment they already own so they can separately sell or salvage them
+        self.value = value #The baseline buy/sell value of the item. The actual buy/sell value will not be exactly this, as merchants will charge a premium for goods and will buy goods for less, but those prices will be based off this
+        self.buffs = buffs #List of buffs which come in the form of 2 part lists, with the 1st part being what it affects, and the 2nd part being by how much. Buffs only apply while this piece of equipment is actively equipped.
+        self.lootweight = lootweight #The weighted odds on a 1-10 scale of finding this item, higher number means higher odds of finding it compared to other potential items in the same lootpool
+        self.resistances = { #A dictionary of the damage types this armor helps protect against. All the resistances in this dictionary will be added to the wearers damage_resistances while wearing it.
+            "Physical": resistances[0], #Standard physical damage type if none of the other 3 physical damage types apply. Other 3 are prioritized however and it should primarily be 1 of those 3 that are used.
+            "Slash": resistances[1], #Effective against fleshy & unarmored targets, but less effective against hard & armored ones
+            "Pierce": resistances[2], #Effective against lightly armored targets, less effective against heavily armored ones
+            "Blunt": resistances[3], #Effective against armored targets, less effective against unarmored ones
+            "Magic": resistances[4], #Effective against targets primarily made of or held together by magic, less effective against those with high mental fortitude
+            "Fire": resistances[5], #Effective against flammable and fleshy foes, inneffective against fire retardant and armored ones
+            "Lightning": resistances[6], #Effective against conductive and armored foes, less effective against fleshy ones
+            "Holy": resistances[7], #Effective against undead or dark foes, inneffective against holy foes
+            "Dark": resistances[8], #Effective against holy foes, inneffective against undead or dark foes
+            "True": resistances[9] #True damage is equally effective against almost every foe, only special forms of magical protection can provide protection against true damage
+        }
+        items_list[self.name] = self
+        equipment_list[self.name] = self
+        armor_list[self.name] = self
+        if quantity > 0:
+            f.encyclopedia["Armor"][self.name] = self
+            
+    def __str__(self):
+        return f"{self.name}: {self.description}. ({self.quantity} owned)"
+        
 #########################################
 #          BACK-END FUNCTIONS           #
 #########################################
@@ -153,15 +178,31 @@ def loot(item, quantity=1): #Used when the player loots an item and adds it to t
     print(f"{operator}{quantity} {item.name}", 0.15)
 
 #########################################
-#              EQUIPMENT                #
+#               WEAPONS                 #
 #########################################
 
-#example_weapon = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark, true], accuracy, critchance, critmultiplier, moves, lootweight)
-empty = weapon("Special", "Empty", "You don't have anything equipped in this slot", -1, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, [], 0)
-bronze_short_sword = weapon("Mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days..", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab"], 0)
-spiked_club = weapon("Both", "Spiked Club", "A crude wooden club with iron nails in it", 1, 0, 70, [25, 15, 20, 30, 0, 0, 0, 0, 0, 0], -5, -10, 1.5, ["Bash"], 7)
-iron_dagger = weapon("Offhand", "Iron Dagger", "A simple iron dagger that's effective at targeting weak spots for critical blows", 2, 0, 125, [15, 15, 25, 5, 0, 0, 0, 0, 0, 0], 10, 10, 2, ["Slash", "Stab"], 6)
-flaming_sword = weapon("Mainhand", "Flaming Sword", "An enchanted iron sword that is constantly ablaze", 4, 0, 300, [20, 30, 25, 15, 0, 25, 0, 0, 0, 0], 5, 0, 1.75, ["Slash", "Stab"], 3)
+#example_weapon = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark, true], accuracy, critchance, critmultiplier, moves, buffs, lootweight)
+empty = weapon("Special", "Empty", "You don't have anything equipped in this slot", -1, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, [], [], 0)
+bronze_short_sword = weapon("Mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days..", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab"], [], 0)
+spiked_club = weapon("Both", "Spiked Club", "A crude wooden club with iron nails in it", 1, 0, 70, [25, 15, 20, 30, 0, 0, 0, 0, 0, 0], -5, -10, 1.5, ["Bash"], [], 7)
+iron_dagger = weapon("Offhand", "Iron Dagger", "A simple iron dagger that's effective at targeting weak spots for critical blows", 2, 0, 125, [15, 15, 25, 5, 0, 0, 0, 0, 0, 0], 10, 10, 2, ["Slash", "Stab"], [], 6)
+flaming_sword = weapon("Mainhand", "Flaming Sword", "An enchanted iron sword that is constantly ablaze", 4, 0, 300, [20, 30, 25, 15, 0, 25, 0, 0, 0, 0], 5, 0, 1.75, ["Slash", "Stab"], [["Fire Resistance", 0.1], ["Fire Affinity", 0.1]], 3)
+
+#########################################
+#                ARMOR                  #
+#########################################
+
+#example_armor = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark, true], buffs, lootweight)
+none = armor("Amulet", "None", "You don't have anything equipped in this slot", -1, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], 0)
+leather_coif = armor("Helmet", "Leather Coif", "A light coif worn on the head made of tanned leather that'll slightly dampen a blow to the head", 1, 0, 35, [0.03, 0.02, 0, 0.05, 0, 0, 0, 0, 0, 0], [], 8)
+padded_gambeson = armor("Chest", "Padded Gambeson", "A light gambeson worn around the torso made of padded cloth that'll offer minimal protection", 1, 0, 50, [0.05, 0.05, 0.02, 0.08, 0, 0, 0, 0, 0, 0], [], 5)
+padded_chausses = armor("Leggings", "Padded Chausses", "A light pair of separate padded cloth chausses that fit over the legs", 1, 0, 40, [0.04, 0.04, 0.02, 0.06, 0, 0, 0, 0, 0, 0], [], 7)
+hunting_boots = armor("Boots", "Hunting Boots", "A light pair of leather boots made for the outdoors", 1, 0, 35, [0.03, 0.03, 0.02, 0.02, 0, 0, 0, 0, 0, 0], [], 8)
+leather_gloves = armor("Gloves", "Leather Gloves", "A light pair of leather gloves that'll protect your knuckles from scrapes and bruises", 1, 0, 30, [0.02, 0.03, 0, 0.02, 0, 0, 0, 0, 0, 0], [], 9)
+fiery_garnet_ring = armor("Ring", "Fiery Garnet Ring", "A silver ring featuring a large, cut garnet gemstone. Increases Fire resistance and affinity", 2, 0, 75, [0, 0, 0, 0, 0, 0.2, 0, 0, 0, 0], [["Fire Affinity", 0.1]], 3)
+amulet_of_wisdom = armor("Amulet", "Amulet Of Wisdom", "A silver necklace adorned with refined sapphires. Increases Max Mana and XP gain", 3, 0, 150, [0, 0, 0, 0, 0.05, 0, 0, 0, 0, 0], [["Mana", 15], ["XP Gain", 0.05]], 1)
+gauntlets_of_strength = armor("Gloves", "Gauntlets of Strength", "Dark orange metal gauntlets that empower its wearer. Increases Strength", 5, 0, 300, [0.07, 0.08, 0.04, 0.05, -0.03, 0, -0.05, 0, 0, 0], [["Strength", 3]], 3)
+hermes_boots = armor("Boots", "Hermes Boots", "Magically imbued green boots with metal wings on either side. Increases Speed and Dexterity but lowers Vitality", 4, 0, 250, [0.05, 0.05, 0.03, 0.02, -0.05, 0, 0.1, 0.05, -0.07, 0], [["Speed", 50], ["Dexterity", 2], ["Vitality", -1]], 1)
 
 #########################################
 #              INVENTORY                #
@@ -176,7 +217,7 @@ mana_potion = item("Consumables", "Mana Potion", f"A blue bottle that restores 5
 large_mana_potion = item("Consumables", "Large Mana Potion", f"A large blue draught that restores 100 MP when drank", mana_potion_action, 6, 0, 100, "Mana", 100, 0, 0, [], -1, 6)
 bread_chunk = item("Consumables", "Chunk Of Bread", "A stale yet hearty chunk of bread. Restores 25 Energy when consumed", food_action, 1, 3, 8, "Energy", 25, 0, 0, [], -1, 9)
 bread_loaf = item("Consumables", "Loaf Of Bread", "A nutritious loaf of bread. Restores 60 Energy when consumed", food_action, 2, 1, 15, "Energy", 60, 0, 0, [], -1, 4)
-hearty_stew = item("Consumables", "Hearty Stew", "A warm bowl of stew that restores 75 Energy and grants the 'Well Fed' buff for the next 5 encounters", food_action, 3, 0, 40, "Energy", 75, 0, 0, [["Well Fed", 5, "user"]], -1, 5)
+hearty_stew = item("Consumables", "Hearty Stew", "A warm bowl of stew that restores 75 Energy and grants the 'Well Fed' buff for 5 turns", food_action, 3, 0, 40, "Energy", 75, 0, 0, [["Well Fed", 5, "user"]], -1, 5)
 throwing_knife = item("Consumables", "Throwing Knife", "A throwing knife that deals 25 Damage", damage_action, 2, 0, 10, "Damage", 25, 0, 0, [], 85, 4)
 poisoned_throwing_knife = item("Consumables", "Poison Throwing Knife", "A throwing knife that deals 20 Damage and inflicts a minor poison", damage_action, 4, 0, 25, "Damage", 20, 0, 0, [["Lesser Poison", 3, "target"]], 80, 4)
 lesser_antidote = item("Consumables", "Lesser Antidote", "Cures you of minor poisons and ailments", "Potion", 2, 0, 25, "Potion", 0, 0, 0, [["Lesser Antidote", 0, "user"]], -1, 3)

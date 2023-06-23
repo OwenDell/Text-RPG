@@ -51,6 +51,8 @@ class Area: #class for all areas
         self.local_enemies = local_enemies #List of local enemies the player may encounter when they trigger the find Enemy encounter
         self.highway_enemies = highway_enemies #List of highway enemies the player may encounter when they trigger the find Enemy encounter while travelling between areas. The pool of highway enemies currently in use is based on the player's current location which.
         areas[self.name] = self
+        if name == "Chalgos":
+            f.encyclopedia["Areas"][self.name] = self
 
     def __str__(self):
         return f"{self.name} ({self.type}): {self.description}. [{abs(self.distance-p.position)}m away]"
@@ -106,6 +108,7 @@ class Area: #class for all areas
             p.position = self.distance
             determine_area()
             print(f"You've arrived at {self.name}.", 1)
+            f.encyclopedia["Areas"][self.name] = self
 
 #########################################
 #              ACTIVITIES               #

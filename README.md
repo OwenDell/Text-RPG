@@ -12,6 +12,8 @@ This is a new attempt at the same formula I did ~2 years ago in C#, being a cycl
 - An elemental damage type system that incorporates weaknesses and resistances to different elements
 - A shop system through various shopkeepers that offer different wares and must be found by venturing to new towns
 - An XP and level up system that allows the player to improve various stats
+- Armor that can provide benefits and drawbacks as well as special buffs
+- A dynamic encyclopedia that automatically fills in with information on the world as you progress and find new things
 
 ## Planned Features:
 - An activities system that allows the player to perform various activities while venturing out in the wilds

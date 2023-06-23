@@ -13,6 +13,7 @@ import encounters as e
 import battle as b
 import statuses as s
 import npc as n
+import encyclopedia as y
 
 #########################################
 #           GLOBAL VARIABLES            #
@@ -213,28 +214,13 @@ def f_equipment(): #prints out the players currently equipped gear, as well as a
         response = f.capitalize(input("Enter either (1) 'Inspect' (2) 'Swap' or (3) 'Exit': "))
         sleep(0.5)
         if response == "Inspect" or response == "1":
-            try:
-                response = p.equipment_list[f.capitalize(input("What piece of equipment would you like to inspect? "))]
-                sleep(0.5)
-                f.header(response.name, 0.7)
-                print(f"\n{response}\n", 1)
-                print(f"Equipment Slot: {f.capitalize(response.slot)}", 0.3)
-                print(f"Tier: {response.tier}", 0.3)
-                print(f"# in Inventory: {response.quantity}", 0.3)
-                print(f"Estimated Value: {response.value}", 0.3)
-                print(f"Accuracy Bonus: {response.accuracy}%", 0.3)
-                print(f"Crit Chance Bonus: {response.critchance}%", 0.3)
-                print(f"Crit Damage Multiplier: {response.critmultiplier*100}%", 0.3)
-                print(f"\nDamage Types:\n", 1)
-                for dmg in response.damages:
-                    operator = "+" if (response.damages[dmg]*player.damage_affinities[dmg])-response.damages[dmg] >= 0 else ""
-                    print(f"{dmg}: {response.damages[dmg]} ({operator}{round((response.damages[dmg]*player.damage_affinities[dmg])-response.damages[dmg], 1)})", 0.3)
-                print(f"\nWeapon Moves:\n", 1)
-                for move in response.moves:
-                    print(moves_list[move], 0.3)
-                print("")
-                f.header("", 1.5)
-            except:
+            response = f.capitalize(input("What piece of equipment would you like to inspect? "))
+            sleep(0.5)
+            if response in p.weapons_list:
+                y.check_encyclopedia(response, "Weapons")
+            elif response in p.armor_list:
+                y.check_encyclopedia(response, "Armor")
+            else:
                 print("Invalid response, your response must be the name of a piece of equipment.", 1)
         elif response == "Swap" or response == "2":
             try:
@@ -330,6 +316,9 @@ def f_travel(): #prints out list of all areas and allows the player to travel be
     else:
         print(f"Unkown response \'{response}\'.")
 
+def f_encyclopedia(): #Opens the players encyclopedia, which contains information on various subjects, mechanics, and tutorials. Some subjects will be available from the start of the game, where as others such as specific enemies will be unavailable until the player encounters them for the first time to avoid spoilers.
+    y.check_encyclopedia()
+
 #########################################
 #               COMMANDS                #
 #########################################
@@ -356,6 +345,7 @@ moves = Command("Moves", "Gives a list of all available moves in combat")
 status_effects = Command("Status Effects", "Gives a list of all of your current status effects")
 use = Command("Use", "Use a consumable item in your inventory while out of combat")
 travel = Command("Travel", "Begin the journey to a different area")
+encyclopedia = Command("Encyclopedia", "View information on various game subjects and mechanics")
 
 #########################################
 #             GAMEPLAY LOOP             #

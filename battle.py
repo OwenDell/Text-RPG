@@ -26,20 +26,7 @@ battling = False #boolean for whether the player is currently engaged in combat,
 
 def calculate_damage(move, user, target, weapon, print_crit=False): #calculates the amount of damage to be done to a target based on multiple factors such as the move, the users damage affinity multipliers, the users weapon, and critical hit bonuses
     if weapon.name == "Empty":
-        damage = move.damage
-        if move.damagetype in target.weaknesses:
-            damage = damage*1.5*user.damage_affinities[move.damagetype]
-            #print(f"{move.damagetype}: Weakness! ({damage} dmg)")
-        elif move.damagetype in target.resistances:
-            damage = damage*0.5*user.damage_affinities[move.damagetype]
-            #print(f"{move.damagetype}: Resistance! ({damage} dmg)")
-        elif move.damagetype in target.immunities:
-            damage = damage*0*user.damage_affinities[move.damagetype]
-            #print(f"{move.damagetype}: Immune! ({damage} dmg)")
-        else:
-            #print(f"{move.damagetype}: Standard! ({damage} dmg)")
-            damage = damage*1*user.damage_affinities[move.damagetype]
-            pass
+        damage = move.damage*user.damage_affinities[move.damagetype]*target.damage_resistances[move.damagetype]
     else:
         damage = 0
         for i, dmg in enumerate(weapon.damages):
@@ -48,18 +35,7 @@ def calculate_damage(move, user, target, weapon, print_crit=False): #calculates 
                 bonus += move.bonusdamage
             elif i <= 3:
                 continue
-            if dmg in target.weaknesses:
-                damage += (weapon.damages[dmg]+bonus)*1.5*user.damage_affinities[dmg]
-                #print(f"{dmg}: Weakness! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1.5} dmg)")
-            elif dmg in target.resistances:
-                damage += (weapon.damages[dmg]+bonus)*0.5*user.damage_affinities[dmg]
-                #print(f"{dmg}: Resistance! ({weapon.damages[dmg]}->{weapon.damages[dmg]*.5} dmg)")
-            elif dmg in target.immunities:
-                damage += (weapon.damages[dmg]+bonus)*0*user.damage_affinities[dmg]
-                #print(f"{dmg}: Immunity! ({weapon.damages[dmg]}->{weapon.damages[dmg]*0} dmg)")
-            else:
-                damage += (weapon.damages[dmg]+bonus)*1*user.damage_affinities[dmg]
-                #print(f"{dmg}: Standard! ({weapon.damages[dmg]}->{weapon.damages[dmg]*1} dmg)")
+            damage = damage+((weapon.damages[dmg]+bonus)*target.damage_resistances[dmg]*user.damage_affinities[dmg])
     damage = round(damage)
     critchance = move.critchance+weapon.critchance+p.effective_dexterity if user is player else move.critchance+weapon.critchance
     if random.randint(0, 100) <= critchance and move.critchance != -1:
@@ -153,6 +129,7 @@ def fight(target): #starts a battle between the player and an enemy. The battle 
     battling = True
     turn_count = 1
     print(f"You begin battle with the enemy {target.name}!", 1.5)
+    target.met = True
     while True:
         f.header(f"Battle with {target.name}: Turn {turn_count}", 0.7)
         s.recur_statuses(player)
@@ -439,8 +416,8 @@ for globals_object in temp_globals:
 
 punch = Attack(True, "Punch", "A quick punch with your fist", 10, 3, "Blunt", 110, 10, 0, 0, "punched", "")
 slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, 3, "Slash", 100, 15, 0, 0, "slashed", "")
-stab = Attack(False, "Stab", "A piercing jab with your weapon", 30, 7, "Pierce", 85, 20, 0, 0, "stabbed", "")
-bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, 5, "Blunt", 95, 5, 0, 0, "bashed", "")
+stab = Attack(False, "Stab", "A piercing jab with your weapon", 25, 5, "Pierce", 85, 20, 0, 0, "stabbed", "")
+bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, 3, "Blunt", 95, 5, 0, 0, "bashed", "")
 uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 20, "Blunt", 80, 10, 10, 0, "delivered a devastating uppercut to", "Uppercut")
 execute = Attack(False, "Execute", "You delete the enemy from existence", -1, 999999, "Physical", -1, 0, 0, 0, "executed", "Execute")
 claw = Attack(False, "Claw", "A painful slash with your claws", 10, 10, "Slash", 90, 15, 0, 0, "clawed", "")

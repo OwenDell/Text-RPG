@@ -22,6 +22,18 @@ mana_potion_action = ["You drank a", "restoring", " Mana"]
 food_action = ["You ate a", "restoring", " Energy"]
 damage_action = ["You used a", "dealing", " damage"]
 spell_action = ["You read a", "and learned the move", ""]
+encyclopedia = {
+    "Enemies": {},
+    "Weapons": {},
+    "Armor": {},
+    "Items": {},
+    "Moves": {},
+    "Characters": {},
+    "Areas": {},
+    "Stats": {},
+    "Mechanics": {},
+    "Tutorials": {}
+}
 
 #########################################
 #                STATS                  #
@@ -102,16 +114,16 @@ class weapon: #for equipment, store every piece of equipment in equipment_list. 
         self.moves = moves #The list of moves that this weapon has. The player will have access to every move of their currently equipped weapon, and those moves will be automatically unlearnt when the player unequips the weapon
         self.lootweight = lootweight #The weighted odds on a 1-10 scale of finding this item, higher number means higher odds of finding it compared to other potential items in the same lootpool
         self.damages = { #A dictionary of the damage types this weapon does as the keys with the associated base damage value for each damage type as the value. Moves will pick one of the 3 damage physical damage types, or default to the "Physical", damage value, and then add on any of the elemental damage types. This means every weapon must either have a value for all of the first 4 damage values, and then the rest can be 0 as those will be adde don.
-            "Physical": damages[0],
-            "Slash": damages[1],
-            "Pierce": damages[2],
-            "Blunt": damages[3],
-            "Magic": damages[4],
-            "Fire": damages[5],
-            "Lightning": damages[6],
-            "Holy": damages[7],
-            "Dark": damages[8],
-            "True": damages[9]
+            "Physical": damages[0], #Standard physical damage type if none of the other 3 physical damage types apply. Other 3 are prioritized however and it should primarily be 1 of those 3 that are used.
+            "Slash": damages[1], #Effective against fleshy & unarmored targets, but less effective against hard & armored ones
+            "Pierce": damages[2], #Effective against lightly armored targets, less effective against heavily armored ones
+            "Blunt": damages[3], #Effective against armored targets, less effective against unarmored ones
+            "Magic": damages[4], #Effective against targets primarily made of or held together by magic, less effective against those with high mental fortitude
+            "Fire": damages[5], #Effective against flammable and fleshy foes, inneffective against fire retardant and armored ones
+            "Lightning": damages[6], #Effective against conductive and armored foes, less effective against fleshy ones
+            "Holy": damages[7], #Effective against undead or dark foes, inneffective against holy foes
+            "Dark": damages[8], #Effective against holy foes, inneffective against undead or dark foes
+            "True": damages[9] #True damage is equally effective against almost every foe, only special forms of magical protection can provide protection against true damage
         }
         items_list[self.name] = self
         equipment_list[self.name] = self
@@ -144,7 +156,7 @@ def loot(item, quantity=1): #Used when the player loots an item and adds it to t
 #              EQUIPMENT                #
 #########################################
 
-#example_weapon = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark], accuracy, critchance, critmultiplier, moves, lootweight)
+#example_weapon = weapon(self, slot, name, description, tier, quantity, value, [physical, slash, pierce, blunt, magic, fire, lightning, holy, dark, true], accuracy, critchance, critmultiplier, moves, lootweight)
 empty = weapon("Special", "Empty", "You don't have anything equipped in this slot", -1, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, [], 0)
 bronze_short_sword = weapon("Mainhand", "Bronze Short Sword", "An old short sword made of bronze... it's seen better days..", 0, 1, 25, [15, 20, 15, 10, 0, 0, 0, 0, 0, 0], 0, 0, 1.5, ["Slash", "Stab"], 0)
 spiked_club = weapon("Both", "Spiked Club", "A crude wooden club with iron nails in it", 1, 0, 70, [25, 15, 20, 30, 0, 0, 0, 0, 0, 0], -5, -10, 1.5, ["Bash"], 7)

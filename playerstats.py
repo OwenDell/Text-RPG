@@ -63,6 +63,24 @@ equipment = { #The players equipment slots, which will be updated throughout the
 xp_gain_multiplier = 1
 
 #########################################
+#              BUFF STATS               #
+#########################################
+
+dmg_affinity_buffs = {
+    "Physical": 0,
+    "Slash": 0,
+    "Pierce": 0,
+    "Blunt": 0,
+    "Magic": 0,
+    "Fire": 0,
+    "Lightning": 0,
+    "Holy": 0,
+    "Dark": 0,
+    "True": 0
+}
+maxMana_buff = 0
+
+#########################################
 #               CLASSES                 #
 #########################################
 
@@ -199,9 +217,9 @@ padded_gambeson = armor("Chest", "Padded Gambeson", "A light gambeson worn aroun
 padded_chausses = armor("Leggings", "Padded Chausses", "A light pair of separate padded cloth chausses that fit over the legs", 1, 0, 40, [0.04, 0.04, 0.02, 0.06, 0, 0, 0, 0, 0, 0], [], 7)
 hunting_boots = armor("Boots", "Hunting Boots", "A light pair of leather boots made for the outdoors", 1, 0, 35, [0.03, 0.03, 0.02, 0.02, 0, 0, 0, 0, 0, 0], [], 8)
 leather_gloves = armor("Gloves", "Leather Gloves", "A light pair of leather gloves that'll protect your knuckles from scrapes and bruises", 1, 0, 30, [0.02, 0.03, 0, 0.02, 0, 0, 0, 0, 0, 0], [], 9)
-fiery_garnet_ring = armor("Ring", "Fiery Garnet Ring", "A silver ring featuring a large, cut garnet gemstone. Increases Fire resistance and affinity", 2, 0, 75, [0, 0, 0, 0, 0, 0.2, 0, 0, 0, 0], [["Fire Affinity", 0.1]], 3)
-amulet_of_wisdom = armor("Amulet", "Amulet Of Wisdom", "A silver necklace adorned with refined sapphires. Increases Max Mana and XP gain", 3, 0, 150, [0, 0, 0, 0, 0.05, 0, 0, 0, 0, 0], [["Mana", 15], ["XP Gain", 0.05]], 1)
-gauntlets_of_strength = armor("Gloves", "Gauntlets of Strength", "Dark orange metal gauntlets that empower its wearer. Increases Strength", 5, 0, 300, [0.07, 0.08, 0.04, 0.05, -0.03, 0, -0.05, 0, 0, 0], [["Strength", 3]], 3)
+fiery_garnet_ring = armor("Ring", "Fiery Garnet Ring", "A silver ring featuring a large, cut garnet gemstone. Increases Fire resistance and affinity", 2, 0, 75, [0, 0, 0, 0, 0, 0.15, 0, 0, 0, 0], [["Fire Affinity", 0.1]], 3)
+amulet_of_wisdom = armor("Amulet", "Amulet Of Wisdom", "A silver necklace adorned with refined sapphires. Increases Max Mana and XP gain", 3, 0, 150, [0, 0, 0, 0, 0.05, 0, 0, 0, 0, 0], [["Max Mana", 15], ["XP Gain", 0.1]], 1)
+gauntlets_of_strength = armor("Gloves", "Gauntlets Of Strength", "Dark orange metal gauntlets that empower its wearer. Increases Strength", 5, 0, 300, [0.07, 0.08, 0.04, 0.05, -0.03, 0, -0.05, 0, 0, 0], [["Strength", 3]], 3)
 hermes_boots = armor("Boots", "Hermes Boots", "Magically imbued green boots with metal wings on either side. Increases Speed and Dexterity but lowers Vitality", 4, 0, 250, [0.05, 0.05, 0.03, 0.02, -0.05, 0, 0.1, 0.05, -0.07, 0], [["Speed", 50], ["Dexterity", 2], ["Vitality", -1]], 1)
 
 #########################################

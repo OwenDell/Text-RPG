@@ -176,20 +176,20 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
     s.cure_check(target)
     c.level_up()
     player.maxHP = 100+20*p.effective_vitality
-    p.maxMana = 20+(10*(p.effective_faith+p.effective_intelligence))
+    p.maxMana = 20+(10*(p.effective_faith+p.effective_intelligence))+p.maxMana_buff
     p.maxEnergy = 100+(10*p.effective_dexterity)
     player.evasion = 2*p.effective_dexterity
     player.damage_affinities = {
-        "Physical": 1+(.1*p.effective_strength),
-        "Slash": 1+(.1*p.effective_strength),
-        "Pierce": 1+(.1*p.effective_strength),
-        "Blunt": 1+(.1*p.effective_strength),
-        "Magic": 1+(.2*p.effective_intelligence),
-        "Fire": 1+(.1*p.effective_faith)+(.1*p.effective_intelligence),
-        "Lightning": 1+(.2*p.effective_faith),
-        "Holy": 1+(.2*p.effective_faith),
-        "Dark": 1+(.2*p.effective_intelligence),
-        "True": 1
+        "Physical": 1+(.1*p.effective_strength)+p.dmg_affinity_buffs["Physical"],
+        "Slash": 1+(.1*p.effective_strength)+p.dmg_affinity_buffs["Slash"],
+        "Pierce": 1+(.1*p.effective_strength)+p.dmg_affinity_buffs["Pierce"],
+        "Blunt": 1+(.1*p.effective_strength)+p.dmg_affinity_buffs["Blunt"],
+        "Magic": 1+(.2*p.effective_intelligence)+p.dmg_affinity_buffs["Magic"],
+        "Fire": 1+(.1*p.effective_faith)+(.1*p.effective_intelligence)+p.dmg_affinity_buffs["Fire"],
+        "Lightning": 1+(.2*p.effective_faith)+p.dmg_affinity_buffs["Lightning"],
+        "Holy": 1+(.2*p.effective_faith)+p.dmg_affinity_buffs["Holy"],
+        "Dark": 1+(.2*p.effective_intelligence)+p.dmg_affinity_buffs["Dark"],
+        "True": 1+p.dmg_affinity_buffs["True"]
     }
     player.health, p.mana, p.energy = f.limit([player.health, p.mana, p.energy], [player.maxHP, p.maxMana, p.maxEnergy])
     for item in p.items_list:
@@ -214,8 +214,8 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
         print(f"You defeated the enemy {target.name} in battle!", 1.5)
         gold_gain = round(random.uniform(target.gold-target.gold*0.1, target.gold+target.gold*0.1))
         player.gold += gold_gain
-        player.XP += target.XP
-        print(f"You gained {gold_gain} gold and {target.XP} XP!", 1)
+        player.XP += (target.XP*p.xp_gain_multiplier)
+        print(f"You gained {gold_gain} gold and {target.XP*p.xp_gain_multiplier} XP!", 1)
         player.cures_list["Victory"] = True
         return True
     if checkup == True:
@@ -265,9 +265,10 @@ def equipment_swap(slot, equipment): #Goes through the procedure when the player
                         print("Invalid response, please enter one of the provided options. (You can also respond with the corresponding number to quickly choose a response)", 1)
     else:
         for resistance in player.damage_resistances:
-            player.damage_resistances[resistance] += p.equipment_list[equipment].resistances[resistance]
-            player.damage_resistances[resistance] -= p.equipment_list[p.equipment[slot]].resistances[resistance]
+            player.damage_resistances[resistance] -= p.equipment_list[equipment].resistances[resistance]
+            player.damage_resistances[resistance] += p.equipment_list[p.equipment[slot]].resistances[resistance]
     p.equipment[slot] = equipment
+    hpcheck(player)
 
 #########################################
 #                 MOVES                 #
@@ -447,12 +448,12 @@ for globals_object in temp_globals:
 #               ATTACKS                 #
 #########################################
 
-punch = Attack(True, "Punch", "A quick punch with your fist", 10, 3, "Blunt", 110, 10, 0, 0, "punched", "")
-slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, 3, "Slash", 100, 15, 0, 0, "slashed", "")
-stab = Attack(False, "Stab", "A piercing jab with your weapon", 25, 5, "Pierce", 85, 20, 0, 0, "stabbed", "")
+punch = Attack(True, "Punch", "A quick punch with your fist", 10, 3, "Blunt", 110, 5, 0, 0, "punched", "")
+slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, 3, "Slash", 100, 8, 0, 0, "slashed", "")
+stab = Attack(False, "Stab", "A piercing jab with your weapon", 25, 5, "Pierce", 85, 12, 0, 0, "stabbed", "")
 bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, 3, "Blunt", 95, 5, 0, 0, "bashed", "")
-uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 20, "Blunt", 80, 20, 10, 0, "delivered a devastating uppercut to", "Uppercut")
+uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 20, "Blunt", 80, 20, 15, 0, "delivered a devastating uppercut to", "Uppercut")
 execute = Attack(False, "Execute", "You delete the enemy from existence", -1, 999999, "Physical", -1, 0, 0, 0, "executed", "Execute")
-claw = Attack(False, "Claw", "A painful slash with your claws", 10, 10, "Slash", 90, 15, 0, 0, "clawed", "")
-bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 15, "Pierce", 85, 10, 0, 0, "bit", "")
+claw = Attack(False, "Claw", "A painful slash with your claws", 10, 10, "Slash", 90, 10, 0, 0, "clawed", "")
+bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 15, "Pierce", 85, 7, 0, 0, "bit", "")
 bowshot = Attack(False, "Bowshot", "You shoot an arrow out of your bow", -1, 0, "Pierce", -1, 25, 0, 10, "shot", "Bowshot")

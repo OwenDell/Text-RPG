@@ -120,7 +120,11 @@ class Buff: #Class for buffs, which are much more simplified than statuses as th
     
     def add(self, amount):
         self.total += amount
-        if self.name not in player.statuses:
+        existed = False
+        for eff in player.statuses:
+            if eff[0] == self.name:
+                existed = True
+        if not existed:
             player.statuses.append([self.name, -1])
         if "Affinity" in self.name:
             effects_list["Affinity"](player, [self.effect, amount, "+"])
@@ -172,10 +176,11 @@ class Standard_Effect: #Class for basic, formulaic effects while still being ext
         p.effective_faith = operators[operator](p.effective_faith, amount) if self.affect == "Faith" else p.effective_faith
         p.speed = operators[operator](p.speed, amount) if self.affect == "Speed" else p.speed
         p.xp_gain_multiplier = operators[operator](p.xp_gain_multiplier, amount) if self.affect == "XP Gain" else p.xp_gain_multiplier
+        p.maxMana_buff = operators[operator](p.maxMana_buff, amount) if self.affect == "Max Mana" else p.maxMana_buff
         if self.affect == "Affinity":
-            player.damage_affinities[effect[0]] += amount
+            p.dmg_affinity_buffs[effect[0]] = operators[operator](p.dmg_affinity_buffs[effect[0]], amount)
         if self.affect == "Resistance":
-            player.damage_resistances[effect[0]] += amount
+            player.damage_resistances[effect[0]] = operators[operator](player.damage_resistances[effect[0]], -amount)
 
 class Apply_Cure: #Simple class for cure effects, necessary for consumable items that apply a cure such as an antidote.
     def __init__(self, name):
@@ -223,15 +228,16 @@ cleanse = Status("Cleanse", "Makes you immune to almost any ailment", [["Cleanse
 #                BUFFS                  #
 #########################################
 
-buff_fire_affinity = Buff("Fire Affinity", "Raises your Fire type damage multiplier", "Fire")
-buff_fire_resistance = Buff("Fire Resistance", "Raises your resistance to Fire type damage", "Fire")
-buff_Vitality = Buff("Vitality", "Raises your Vitality", "Vitality")
-buff_Strength = Buff("Strength", "Raises your Strength", "Strength")
-buff_Dexterity = Buff("Dexterity", "Raises your Dexterity", "Dexterity")
-buff_Intelligence = Buff("Intelligence", "Raises your Intelligence", "Intelligence")
-buff_Faith = Buff("Faith", "Raises your Faith", "Faith")
-buff_Speed = Buff("Speed", "Raises your Speed", "Speed")
-buff_XP_gain = Buff("XP Gain", "Raises your XP gain multiplier", "XP Gain")
+buff_fire_affinity = Buff("Fire Affinity", "Affects your Fire type damage multiplier", "Fire")
+buff_fire_resistance = Buff("Fire Resistance", "Affects your resistance to Fire type damage", "Fire")
+buff_Vitality = Buff("Vitality", "Affects your Vitality", "Vitality")
+buff_Strength = Buff("Strength", "Affects your Strength", "Strength")
+buff_Dexterity = Buff("Dexterity", "Affects your Dexterity", "Dexterity")
+buff_Intelligence = Buff("Intelligence", "Affects your Intelligence", "Intelligence")
+buff_Faith = Buff("Faith", "Affects your Faith", "Faith")
+buff_Speed = Buff("Speed", "Affects your Speed", "Speed")
+buff_XP_gain = Buff("XP Gain", "Affects your XP gain multiplier", "XP Gain")
+buff_Max_Mana = Buff("Max Mana", "Affects your maximum Mana", "Max Mana")
 
 #########################################
 #           STANDARD EFFECTS            #
@@ -248,6 +254,7 @@ speed = Standard_Effect("Speed", 3, ["increased", "decreased"], "Speed")
 affinity = Standard_Effect("Affinity", 3, ["increased", "decreased"], "Affinity")
 resistance = Standard_Effect("Resistance", 3, ["increased", "decreased"], "Resistance")
 xp_gain = Standard_Effect("XP Gain", 3, ["increased", "decreased"], "XP Gain")
+max_mana = Standard_Effect("Max Mana", 3, ["increased", "decreased"], "Max Mana")
 
 #########################################
 #                CURES                  #

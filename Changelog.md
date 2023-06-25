@@ -1,5 +1,15 @@
 # Changelog
 
+## Update a0.2.5.1 (6/25/23)
+- Evasion and Received Damage Multiplier stats added to the Stats command
+- Fixed error when printing enemies moves stats in encyclopedia
+- Fixed bug causing equipment buffs to not work properly
+- Fixed bug causing gained XP after battle to not show accurately while XP Multiplier buff is active
+- Fixed bug causing armor damage resistances to have inverse affect on player damage resistances
+- Rebalanced crit chances of most moves
+- Fixed bug causing multiple buffs to appear in player status effects list
+- Fixed bug causing Gauntlets Of Strength to be unobtainable
+
 ## Update a0.2.5 (6/23/23)
 - Changed the way status effects work on the back-end to be more modular; no difference to gameplay
 - Changed the way damage resistances work so they can now come in varying degrees of resistance as opposed to just weak, resistant, immune, or standard

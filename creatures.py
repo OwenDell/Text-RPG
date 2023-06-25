@@ -108,21 +108,9 @@ def level_up(freelvl=False): #Checks to see if the player has the required amoun
                 p.effective_intelligence = p.effective_intelligence+1 if response == "Intelligence" else p.effective_intelligence
                 p.effective_faith = p.effective_faith+1 if response == "Faith" else p.effective_faith
                 player.maxHP = (p.effective_vitality*20)+100
-                p.maxMana = ((p.effective_intelligence+p.effective_faith)*10)+100
+                p.maxMana = ((p.effective_intelligence+p.effective_faith)*10)+20+p.maxMana_buff
                 p.maxEnergy = 100+(10*p.effective_dexterity)
                 player.evasion = 2*p.effective_dexterity
-                player.damage_affinities = {
-                    "Physical": 1+(.1*p.effective_strength),
-                    "Slash": 1+(.1*p.effective_strength),
-                    "Pierce": 1+(.1*p.effective_strength),
-                    "Blunt": 1+(.1*p.effective_strength),
-                    "Magic": 1+(.2*p.effective_intelligence),
-                    "Fire": 1+(.1*p.effective_faith)+(.1*p.effective_intelligence),
-                    "Lightning": 1+(.2*p.effective_faith),
-                    "Holy": 1+(.2*p.effective_faith),
-                    "Dark": 1+(.2*p.effective_intelligence),
-                    "True": 1
-                }
                 player.health = player.maxHP
                 p.mana = p.maxMana
                 p.energy = p.maxEnergy

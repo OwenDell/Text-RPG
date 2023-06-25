@@ -59,7 +59,7 @@ def check_encyclopedia(subject=False, category=False):
                         _move = c.moves_list[sub.moves[move][0]]
                         accuracy_desc =  f" | {_move.accuracy}% Accuracy" if _move.accuracy != -1 else ""
                         if _move.name in encyclopedia["Moves"]:
-                            print(f"{_move.name}: {_move.description} that deals {_move.damage} {_move.damagetype} damage. [{sub.critchance}% Critical Chance{accuracy_desc}]", 0.3)
+                            print(f"{_move.name}: {_move.description} that deals {_move.damage} {_move.damagetype} damage. [{_move.critchance}% Critical Chance{accuracy_desc}]", 0.3)
                         else:
                             print("?????????", 0.3)
                     print(f"\nReceived Damage Multipliers:", 0.3)
@@ -94,10 +94,10 @@ def check_encyclopedia(subject=False, category=False):
                     print(f"# in Inventory: {sub.quantity}", 0.3)
                     print(f"Estimated Value: {sub.value}", 0.3)
                     print(f"Rarity: {abs(11-sub.lootweight)}", 0.3)
-                    print(f"\nResistances:\n", 0.3)
+                    print(f"\nDamage Resistances:\n", 0.3)
                     for resistance in sub.resistances:
                         operator = "+" if sub.resistances[resistance] >= 0 else ""
-                        print(f"{resistance}: {operator}{sub.resistances[resistance]*100}% ({round(player.damage_resistances[resistance]*100, 1)}% Total)", 0.3)
+                        print(f"{resistance}: {operator}{round(sub.resistances[resistance]*100, 1)}%", 0.3)
                     if len(sub.buffs) > 0:
                         print(f"\nBuffs:\n", 0.3)
                         for buff in sub.buffs:

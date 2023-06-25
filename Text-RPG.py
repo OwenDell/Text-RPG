@@ -184,24 +184,29 @@ def f_use(): #allows the player to use any consumable item while out of combat
 
 def f_stats(): #prints out current information about the player
     f.header(f"{p.player_name}'s Stats", 0.5)
-    print(f"Current Area: {p.current_area.name}", 0.3)
-    print(f"Level: {player.level}", 0.3)
-    print(f"Experience: {player.XP}/{p.reqXP}", 0.3)
-    print(f"Health: {player.health}/{player.maxHP}", 0.3)
-    print(f"Mana: {p.mana}/{p.maxMana}", 0.3)
-    print(f"Energy: {p.energy}/{p.maxEnergy}", 0.3)
-    print(f"Gold: {player.gold}", 0.3)
+    print(f"\nCurrent Area: {p.current_area.name}", 0.25)
+    print(f"Level: {player.level}", 0.25)
+    print(f"Experience: {player.XP}/{p.reqXP}", 0.25)
+    print(f"Health: {player.health}/{player.maxHP}", 0.25)
+    print(f"Mana: {p.mana}/{p.maxMana}", 0.25)
+    print(f"Energy: {p.energy}/{p.maxEnergy}", 0.25)
+    print(f"Evasion: {player.evasion}%", 0.25)
+    print(f"Speed: {p.speed}%", 0.25)
+    print(f"Gold: {player.gold}", 0.25)
     operator = "+" if p.effective_vitality-p.vitality >= 0 else ""
-    print(f"Vitality: {p.vitality} ({operator}{p.effective_vitality-p.vitality})", 0.3)
+    print(f"\nVitality: {p.vitality} ({operator}{p.effective_vitality-p.vitality})", 0.25)
     operator = "+" if p.effective_strength-p.strength >= 0 else ""
-    print(f"Strength: {p.strength} ({operator}{p.effective_strength-p.strength})", 0.3)
+    print(f"Strength: {p.strength} ({operator}{p.effective_strength-p.strength})", 0.25)
     operator = "+" if p.effective_dexterity-p.dexterity >= 0 else ""
-    print(f"Dexterity: {p.dexterity} ({operator}{p.effective_dexterity-p.dexterity})", 0.3)
+    print(f"Dexterity: {p.dexterity} ({operator}{p.effective_dexterity-p.dexterity})", 0.25)
     operator = "+" if p.effective_intelligence-p.intelligence >= 0 else ""
-    print(f"Intelligence: {p.intelligence} ({operator}{p.effective_intelligence-p.intelligence})", 0.3)
+    print(f"Intelligence: {p.intelligence} ({operator}{p.effective_intelligence-p.intelligence})", 0.25)
     operator = "+" if p.effective_faith-p.faith >= 0 else ""
-    print(f"Faith: {p.faith} ({operator}{p.effective_faith-p.faith})", 0.3)
-    print(f"Speed: {p.speed}%", 0.3)
+    print(f"Faith: {p.faith} ({operator}{p.effective_faith-p.faith})", 0.25)
+    print(f"\nReceived Damage Multipliers:", 0.25)
+    for resistance in player.damage_resistances:
+        print(f"{resistance}: {round(player.damage_resistances[resistance]*100, 1)}%", 0.25)
+    print("")
     f.header("", 0.5)
 
 def f_equipment(): #prints out the players currently equipped gear, as well as allowing them to inspect any piece of equipment and swapping out their currently equipped gear

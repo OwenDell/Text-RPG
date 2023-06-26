@@ -1,6 +1,6 @@
 # Changelog
 
-## Update a0.2.5.1 (6/25/23)
+## Update a0.2.5.2 (6/25/23)
 - Evasion and Received Damage Multiplier stats added to the Stats command
 - Fixed error when printing enemies moves stats in encyclopedia
 - Fixed bug causing equipment buffs to not work properly
@@ -9,6 +9,7 @@
 - Rebalanced crit chances of most moves
 - Fixed bug causing multiple buffs to appear in player status effects list
 - Fixed bug causing Gauntlets Of Strength to be unobtainable
+- Added the Rest activity
 
 ## Update a0.2.5 (6/23/23)
 - Changed the way status effects work on the back-end to be more modular; no difference to gameplay

@@ -121,7 +121,7 @@ class a_Explore: #pulls a random encounter from the current areas list of possib
         activities_list[self.name] = self
 
     def __str__(self):
-        return f"{self.name}: Explore around in your current area to find treasure, foes, and special encounters."
+        return f"{self.name}: Use 5 energy to explore around in your current area to find treasure, foes, and special encounters."
     
     def __call__(self, area):
         if p.energy >= 5:
@@ -131,7 +131,7 @@ class a_Explore: #pulls a random encounter from the current areas list of possib
             area.find_encounter()
             sleep(0.5)
         else:
-            print("You don't have enough energy to do that!")
+            print("You don't have enough energy to do that!", 1)
 
 class a_Shop: #lets the player visit any shopkeepers in the current area. The player is given a list of all shopkeepers in the area and is able to choose which one they want to visit.
     def __init__(self):
@@ -156,11 +156,37 @@ class a_Shop: #lets the player visit any shopkeepers in the current area. The pl
             print("Invalid response, your response must be the name of a listed shopkeeper.", 1)
         print(f"You make your way back to the center of {area.name}...", 2)
 
+class a_Rest: #Rest at the local inn. Fully restores mana and energy, as well as half the max HP. Costs gold relative to the players level.
+    def __init__(self):
+        self.name = "Rest"
+        global activities_list
+        activities_list[self.name] = self
+
+    def __str__(self):
+        return f"{self.name}: Pay {35+player.level*15} gold to rest at the local inn, fully restoring your Energy and Mana, as well as half your total HP."
+    
+    def __call__(self, area):
+        print(f"Welcome to the inn of {area.name}, you can spend the night resting here, but it'll cost you {35+player.level*15} gold.", 2.5)
+        if f.capitalize(input("Do you want to pay the gold to rest at the inn, (Y/N)? ")) == "Y":
+            sleep(0.5)
+            if player.gold >= 35+player.level*15:
+                print(f"After paying the inn keeper {35+player.level*15} gold, you head up the room and soon fall asleep...", 5)
+                p.mana = p.maxMana
+                p.energy = p.maxEnergy
+                player.health += player.maxHP/2
+                player.gold -= 35+player.level*15
+                print(f"You wake up feeling very refreshed, and head back out into town ready to start the day.", 2.5)
+            else:
+                print("You don't have enough gold to do that!", 1)
+        else:
+            sleep(0.5)
+            print("You leave the inn dissatisfied with the exorbitant prices.", 1)
+
 #########################################
 #                 AREAS                 #
 #########################################
 
-chalgos = Area("Chalgos", "A small, peaceful town in the middle of the Gavlynn Forest", "", "Settlement", 1, 0, k_start, "The guards are barring you from entering the town.", ["Shop"], [], [], [[c.goblin, 100]])
+chalgos = Area("Chalgos", "A small, peaceful town in the middle of the Gavlynn Forest", "", "Settlement", 1, 0, k_start, "The guards are barring you from entering the town.", ["Shop", "Rest"], [], [], [[c.goblin, 100]])
 gavlynn_forest = Area("Gavlynn Forest", "A dark, dense forest... venturing far from the trail is dangerous here...", "You begin venturing off the beaten path and into the dense foliage...", "Field", 1, 300, k_start, "You're not yet ready to venture outside the safety of the town.", ["Explore"], [[e.Enemy(), 55], [e.GoldPouch(), 20], [e.FindItem(), 25]], [[c.goblin, 50], [c.wolf, 30], [c.skeleton_archer, 20], [c.elusive_ghost, 10]], [[c.wolf, 50], [c.goblin, 20], [c.bandit, 80]])
 farlands = Area("Farlands", "A very far away place", "You begin venturing off the beaten path and into the dense foliage...", "Field", 1, 1700, k_start, "You're not yet ready to venture outside the safety of the town.", ["Explore"], [[e.Enemy(), 55], [e.GoldPouch(), 20], [e.FindItem(), 25]], [[c.goblin, 50], [c.wolf, 30], [c.skeleton_archer, 20], [c.elusive_ghost, 10]], [[c.wwe_champ, 50], [c.elusive_ghost, 20]])
 

@@ -57,11 +57,14 @@ def check_encyclopedia(subject=False, category=False):
                     print(f"\nMoves:", 0.3)
                     for move in range(len(sub.moves)):
                         _move = c.moves_list[sub.moves[move][0]]
-                        accuracy_desc =  f" | {_move.accuracy}% Accuracy" if _move.accuracy != -1 else ""
-                        if _move.name in encyclopedia["Moves"]:
-                            print(f"{_move.name}: {_move.description} that deals {_move.damage} {_move.damagetype} damage. [{_move.critchance}% Critical Chance{accuracy_desc}]", 0.3)
+                        if _move.name == "Flee":
+                            print(f"Flee: The user attempts to flee combat.", 0.3)
                         else:
-                            print("?????????", 0.3)
+                            accuracy_desc =  f" | {_move.accuracy}% Accuracy" if _move.accuracy != -1 else ""
+                            if _move.name in encyclopedia["Moves"]:
+                                print(f"{_move.name}: {_move.description} that deals {_move.damage} {_move.damagetype} damage. [{_move.critchance}% Critical Chance{accuracy_desc}]", 0.3)
+                            else:
+                                print("?????????", 0.3)
                     print(f"\nReceived Damage Multipliers:", 0.3)
                     for dmg in sub.damage_resistances:
                         print(f"{dmg}: {sub.damage_resistances[dmg]*100}%", 0.3)

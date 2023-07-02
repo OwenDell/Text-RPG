@@ -25,7 +25,7 @@ equipment_list = p.equipment_list
 weapons_list = p.weapons_list
 armor_list = p.armor_list
 keyitems_list = p.keyitems_list
-materials_list = p.materials_list
+miscellaneous_list = p.miscellaneous_list
 specials_list = c.specials_list
 npc_list = {} #Dictionary of all NPC's, including shopkeepers. NPC's are defined by named entities that you can interact with, build relationship with, and have potential quests, tasks, or opportunities for you.
 shopkeeper_list = {} #Dictionary of all specifically shopkeeper NPC's.
@@ -54,7 +54,7 @@ class Shopkeeper: #class for shopkeeper NPC's. Regular NPC's will use a similar 
             "Weapons": {},
             "Armor": {},
             "Key Items": {},
-            "Materials": {}
+            "Miscellaneous": {}
         }
         for item in items_list: #Goes through every item in the game and checks if that item exists in both the shopkeepers list of sold item categories and tiers or is a whitelisted item and not a blacklisted item. They are then separated into specific categories
             if ((items_list[item].slot in shop_categories and items_list[item].tier in shop_tiers) and items_list[item].name not in shop_blacklist) or items_list[item].name in shop_whitelist:
@@ -66,8 +66,8 @@ class Shopkeeper: #class for shopkeeper NPC's. Regular NPC's will use a similar 
                     self.shop_inventory["Armor"][item] = items_list[item]
                 if item in keyitems_list:
                     self.shop_inventory["Key Items"][item] = items_list[item]
-                if item in materials_list:
-                    self.shop_inventory["Materials"][item] = items_list[item]
+                if item in miscellaneous_list:
+                    self.shop_inventory["Miscellaneous"][item] = items_list[item]
 
     def __str__(self):
         return f"{self.name}: {self.description} [Reputation: {self.relation}]"
@@ -101,15 +101,18 @@ class Shopkeeper: #class for shopkeeper NPC's. Regular NPC's will use a similar 
                         break
                     elif response2 in self.shop_inventory[response]:
                         try:
-                            amount = 1 if response != "Consumables" and response != "Materials" else int(input(f"How many {response2}'s would you like to purchase? "))
+                            amount = 1 if response != "Consumables" and response != "Miscellaneous" and items_list[response2].slot != "Ammo" else int(input(f"How many {response2}'s would you like to purchase? "))
                             sleep(0.5)
-                            cost = f.limit(round(items_list[response2].value+(items_list[response2].value*(0.2-(self.relation*0.002)))), round(items_list[response2].value*1.5), items_list[response2].value)*amount
-                            if player.gold >= cost:
-                                player.gold -= cost
-                                items_list[response2].quantity += amount
-                                print(f"You bought {amount} {response2}(s) for {cost} gold.", 1)
+                            if amount >= 1:
+                                cost = f.limit(round(items_list[response2].value+(items_list[response2].value*(0.2-(self.relation*0.002)))), round(items_list[response2].value*1.5), items_list[response2].value)*amount
+                                if player.gold >= cost:
+                                    player.gold -= cost
+                                    items_list[response2].quantity += amount
+                                    print(f"You bought {amount} {response2}(s) for {cost} gold.", 1)
+                                else:
+                                    print(f"You don't have enough gold to buy {amount} {response2}(s), you're missing {cost-player.gold} gold!", 1.5)
                             else:
-                                print(f"You don't have enough gold to buy {amount} {response2}(s), you're missing {cost-player.gold} gold!", 1.5)
+                                print(f"Invalid response, you can't buy less than 1 of an item.", 1.5)
                         except:
                             print("Invalid response, your response must be a whole number.", 1)
                     else:
@@ -130,7 +133,7 @@ class Shopkeeper: #class for shopkeeper NPC's. Regular NPC's will use a similar 
                 try:
                     response2 = int(input(f"How many {response}'s do you want to sell? "))
                     sleep(0.5)
-                    if response2 <= items_list[response].quantity:
+                    if response2 <= items_list[response].quantity and response2 >= 1:
                         items_list[response].quantity -= response2
                         player.gold += cost*response2
                         print(f"You sold {response2} {response}(s) for {cost*response2} gold.", 1)
@@ -193,7 +196,7 @@ def converse(npc): #called when the player visits an NPC. Plays an intro dialogu
 Andre = Shopkeeper("Andre", "An old, grizzled blacksmith who's forged weapons and armor for many a naive adventurer.", 0, [], ["Chalgos"], [], ["Talk", "Quests", "Buy", "Sell", "Exit"], \
                    {"Meet": "Hmph... what are you, nother novice adventurer set on rushing to their deaths? Well if that's what you want, I may as well try to help you last as long as possible...", -100: "Bold of you to show your face around here... do your business quick and go.", -40: "Hm... What do you want...", -5: "Ah, you're back... honestly I'm somewhat surprised.", 20: f"Welcome back {p.player_name}, what can I do for ya?", 60: f"Well, if it isn't {p.player_name}! How can I be of service?"}, \
                    [["Bah, don't bother trying to convince me otherwise, I've seen plenty of your kind before... and they always end up the same way...", "But, I can't say I don't understand the desire to venture out into the great unknown and try to make a name for yourself.", "I considered it once... but fate had other plans in mind for me."], ["I'll try my best to equip you well enough that you at least have a chance out there.", "... Hopefully my wares will serve you better than it did the rest..."], ["I suppose I may as well try and impart some words of wisdom on you if you insist on this.", "If you want any hope of making it out there then you'd better listen close.", "First off, you'd best pay attention to the damage types of your weapons. Every weapon does different amounts of the various damage types, and enemies will be more resistant or weak to different ones.", "For example, slashing attacks won't do much against heavily armored foes, but there's little their armor can do against a solid blunt attack."]], \
-                   ["Mainhand", "Offhand", "Both", "Special", "Helmet", "Chest", "Leggings", "Gloves", "Boots"], [0, 1, 2], [], [])
+                   ["Mainhand", "Offhand", "Both", "Special", "Helmet", "Chest", "Leggings", "Gloves", "Boots"], [0, 1, 2], ["Flint Arrow", "Pickaxe"], [])
 
 Malbras = Shopkeeper("Malbras", "The kind owner of the only tavern in Chalgos. He'll sell basic supplies and food necessary for adventuring.", 10, [], ["Chalgos"], [], ["Talk", "Quests", "Buy", "Sell", "Exit"], \
                     {"Meet": f"Hey there, you must be {p.player_name}, my name's Malbras, make yourself comfortable!", -100: "The only reason you can even show your face in here is because I can't afford a guard...", -60: "You're lucky I'm so lenient towards paying customers...", -10: "What'll it be today?", 30: f"Hey there {p.player_name}, what're ya lookin for today?", 60: f"Welcome in {p.player_name}! Make yourself right at home!"}, \

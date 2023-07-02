@@ -216,6 +216,7 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
         player.gold += gold_gain
         player.XP += (target.XP*p.xp_gain_multiplier)
         print(f"You gained {gold_gain} gold and {target.XP*p.xp_gain_multiplier} XP!", 1)
+        target.loot_enemy()
         player.cures_list["Victory"] = True
         return True
     if checkup == True:
@@ -315,13 +316,15 @@ class m_Flee: #Attempts to flee from combat, odds of success is 50% chance + the
     def __str__(self):
         return f"{self.name}: You attempt to flee combat."
         
-    def __call__(self, player, target):
+    def __call__(self, user, target):
         global battling
-        if random.randint(0, 100) <= 50+(player.evasion-target.evasion):
+        user_print = "You" if user is player else "the " + user.name
+        target_print = "You" if target is player else "the " + target.name
+        if random.randint(0, 100) <= 50+(user.evasion-target.evasion):
             battling = False
-            print(f"You successfully fled combat from the enemy {target.name}!", 2)
+            print(f"{user_print} fled from {target_print} in combat!", 2)
         else:
-            print(f"You tried to escape the enemy {target.name}, but they caught you!", 2)
+            print(f"{user_print} tried to escape from {target_print}, but it failed!", 2)
            
 class m_Use: #use a consumable item, which can be something simple that affects mana, energy, or health, or something more complex that applies a status effect.
     def __init__(self):

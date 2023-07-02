@@ -21,7 +21,7 @@ specials_list = {} #a dictionary of special moves that are stored separately fro
 #########################################
 
 class Creature: #The class for all creatures, including the player. Using the same class for both has some complications, and in a lot of cases it means that the variables don't entirely mean the same thing for the player vs enemies, but it works.
-    def __init__(self, name, level, XP, maxHP, gold, evasion, moves, affinities, resistances, intro):
+    def __init__(self, name, level, XP, maxHP, gold, evasion, moves, affinities, resistances, drops, intro):
         self.name = name #name of the creature
         self.level = level #level of the creature, in the case of enemies this is just used to determine its difficulty.
         self.XP = XP #In the case of the player, this is how much XP they have to determine how close they are to levelling up. For enemies, this is how much XP they give when defeated by the player.
@@ -31,6 +31,7 @@ class Creature: #The class for all creatures, including the player. Using the sa
         self.evasion = evasion #Determines how likely it is for this creature to avoid getting hit by an attack.
         self.moves = moves #List of moves this creature can perform during combat, for the player this is actually a dictionary that will change throughout the game as the player learns new moves and changes out their gear.
         self.intro = intro #The intro text played when the player encounters this creature.
+        self.drops = drops #A list of possible item drops that have an associated chance of being looted from this creature as well as how much upon defeating it in battle
         self.statuses = [] #List of statuses currently affecting this creature. Statuses come in the form of lists, where the first part is the name of the status, and the second part is the duration.
         self.cures_list = { #Dictionary of status cures this creature has access to. If the creature is impacted by a status and one of it's cures are in here as True, then they will be cured of it. This is stored here as it can't be universal or else the player using an antidote would trigger the enemy to be cured of their poison or visa versa.
             "Conclusion": False,
@@ -72,6 +73,13 @@ class Creature: #The class for all creatures, including the player. Using the sa
         
     def creature_attack(self, target): #randomly chooses an attack from the creatures attack pool. Takes into account the chance of the move to be chosen out of the total pool.
         moves_list[f.weighted_random(self.moves)](self, target)
+
+    def loot_enemy(self):
+        for item in self.drops:
+            if random.randint(0, 100) <= item[1]:
+                amount = random.randint(item[2], item[3])
+                p.items_list[item[0]].quantity += amount
+                print(f"You looted {amount} {item[0]}(s) from the {self.name}'s corpse.", 1)
 
 #########################################
 #          BACK-END FUNCTIONS           #
@@ -135,10 +143,15 @@ for globals_object in temp_globals:
 #########################################
 
 #[physical, slash, pierce, blunt, magic, fire, lightning, holy, dark, true]
-player = Creature("Player", 1, 0, 100, 0, 0, {}, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "You encountered... yourself?")
-goblin = Creature("Goblin", 1, 20, 50, 35, 5, [["Stab", 30], ["Claw", 70], ["Bite", 50]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1.25, 1, 1, 1, 1.25, 1, 1, 1, 1], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
-wolf = Creature("Wolf", 2, 50, 150, 50, 10, [["Claw", 150], ["Bite", 80]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1.25, 1.25, 1, 1, 1], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
-skeleton_archer = Creature("Skeletal Archer", 2, 50, 80, 60, 0, [["Punch", 35], ["Bowshot", 65]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0.75, 0.5, 1.5, 1.25, 0.5, 0.75, 2, 0, 1], "An arrow suddenly strikes the ground right between your legs, and as you turn around you see a skeletal archer in the process of knocking another arrow!")
-wwe_champ = Creature("WWE Champion", 5, 200, 200, 150, 10, [["Punch", 70], ["Uppercut", 30]], [1, 1, 1, 1.25, 1, 1, 1, 1, 1, 1], [1, 1.25, 1, 0.75, 1, 1.25, 1, 1, 1, 1], "You approach a mysterious boxing ring as smoke fills up around you... just as you get the feeling you've arrived somewhere you shouldn't be you hear a bell ring and a burly man emerges from the fog looking ready for bloodshed.") #used for testing purposes
-elusive_ghost = Creature("Elusive Ghost", 3, 100, 30, 55, 15, [["Punch", 40], ["Claw", 40], ["Slash", 20]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1.5, 0.5, 1, 1.5, 0.5, 1], "A swirling mist ahead of you congeals into a spectral figure... it's an elusive ghost! They can't be damaged by normal means!")
-bandit = Creature("Bandit", 2, 35, 70, 50, 0, [["Stab", 50], ["Slash", 70], ["Bowshot", 20], ["Punch", 30]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1.25, 1, 1, 1.25, 1, 1, 1, 1], "As your walking along a dirt path a grizzled man jumps out from behind a tree in front of you! 'Surrender your posessions or die!' he shouts at you. He gives you a mean snear as you draw your weapon...")
+player = Creature("Player", 1, 0, 100, 0, 0, {}, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [], "You encountered... yourself?")
+goblin = Creature("Goblin", 1, 20, 50, 35, 5, [["Stab", 30], ["Claw", 70], ["Bite", 50]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1.25, 1, 1, 1, 1.25, 1, 1, 1, 1], [["Garnet", 10, 1, 1], ["Chunk Of Bread", 20, 1, 2], ["Bronze Short Sword", 10, 1, 1], ["Stick", 40, 1, 3], ["Flint", 30, 1, 2]], "You hear a rustle of leaves from a nearby bush... as you get closer to investigate, a goblin springs out, with a shortsword in its hand!")
+wolf = Creature("Wolf", 2, 50, 150, 50, 10, [["Claw", 150], ["Bite", 80]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1.25, 1.25, 1, 1, 1], [["Raw Meat", 65, 2, 3]], "You hear a deep, loud bark behind you... you turn to see a growling wolf with its teeth bared!")
+skeleton_archer = Creature("Skeletal Archer", 2, 50, 80, 60, 0, [["Punch", 35], ["Bowshot", 65]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0.75, 0.5, 1.5, 1.25, 0.5, 0.75, 2, 0, 1], [["Flint Arrow", 70, 2, 5], ["Amulet Of Wisdom", 5, 1, 1]], "An arrow suddenly strikes the ground right between your legs, and as you turn around you see a skeletal archer in the process of knocking another arrow!")
+wwe_champ = Creature("WWE Champion", 5, 300, 250, 150, 10, [["Punch", 60], ["Uppercut", 40]], [1, 1, 1, 1.25, 1, 1, 1, 1, 1, 1], [1, 1.25, 1, 0.75, 1, 1.25, 1, 1, 1, 1], [["Gauntlets Of Strength", 100, 1, 1]], "You approach a mysterious boxing ring as smoke fills up around you... just as you get the feeling you've arrived somewhere you shouldn't be you hear a bell ring and a burly man emerges from the fog looking ready for bloodshed.") #used for testing purposes
+elusive_ghost = Creature("Elusive Ghost", 3, 100, 30, 55, 15, [["Punch", 40], ["Claw", 40], ["Slash", 20]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1.5, 0.5, 1, 1.5, 0.5, 1], [["Amulet Of Wisdom", 10, 1, 1], ["Hermes Boots", 5, 1, 1]], "A swirling mist ahead of you congeals into a spectral figure... it's an elusive ghost! They can't be damaged by normal means!")
+bandit = Creature("Bandit", 2, 35, 70, 50, 0, [["Stab", 50], ["Slash", 70], ["Bowshot", 20], ["Punch", 30]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1.25, 1, 1, 1.25, 1, 1, 1, 1], [["Throwing Knife", 40, 2, 4], ["Poison Throwing Knife", 20, 2, 3], ["Iron Dagger", 3, 1, 1], ["Spiked Club", 5, 1, 1], ["Padded Gambeson", 5, 1, 1], ["Hunting Boots", 7, 1, 1], ["Leather Gloves", 7, 1, 1]], "As your walking along a dirt path a grizzled man jumps out from behind a tree in front of you! 'Surrender your posessions or die!' he shouts at you. He gives you a mean snear as you draw your weapon...")
+
+#Huntable creatures
+deer = Creature("Deer", 2, 10, 50, 0, 5, [["Flee", 100]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1.25, 1.5, 1, 1, 1.25, 1.1, 0.85, 1.5, 1], [["Raw Meat", 100, 4, 6]], "You spot a trail of tracks, and after quietly following them for a short ways you see the deer that's been making them.")
+rabbit = Creature("Rabbit", 1, 5, 15, 0, 20, [["Flee", 100]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1.5, 1.5, 1, 1.25, 1.25, 0.8, 1.5, 1], [["Raw Meat", 100, 1, 3]], "You hear a rustle from the bushes ahead of you... and after getting closer to investigate, a rabbit jumps out from them!")
+turkey = Creature("Turkey", 1, 3, 35, 0, -10, [["Flee", 100]], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1.1, 1.25, 1.5, 1, 1, 1.4, 0.9, 1.5, 1], [["Raw Meat", 100, 2, 3], ["Feather", 70, 4, 7]], "As you're walking along a dirt trail, you hear a rustling sound nearby. After brief investigation, you find the source of the sound to be a wild turkey.")

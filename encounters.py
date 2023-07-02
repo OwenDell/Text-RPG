@@ -69,7 +69,7 @@ class Uneventful:
         highway_encounters_uneventful.append(self)
 
     def __call__(self, area):
-        gold = self.gold*area.level + random.randint((self.gold-2)*area.level, (self.gold+2)*area.level)
+        gold = self.gold*area.level + random.randint((self.gold-2)*area.level, (self.gold+2)*area.level) if self.gold != 0 else 0
         p.energy += self.energy
         player.gold += gold
         player.health += self.health

@@ -10,13 +10,13 @@ import functions as f
 
 print = f.print_override
 sleep = f.sleep
-items_list = {} #Dictionary of all items in the game, this includes consumables, equipment, materials, and key items. All items will be divided into smaller categories below.
+items_list = {} #Dictionary of all items in the game, this includes consumables, equipment, miscellaneous, and key items. All items will be divided into smaller categories below.
 consumables_list = {} #Category for consumable items
 equipment_list = {} #Category for equipment type items
 weapons_list = {} #Sub-category for weapon type equipment
 armor_list = {} #Sub-category for armor type equipment
 keyitems_list = {} #Category for key item type items
-materials_list = {} #Category for key item type items
+miscellaneous_list = {} #Category for material type items
 health_potion_action = ["You drank a", "healing", " HP"] #These 'actions' are used for easy modularity with consumable items, as they are pieced together along with other pieces of information when printing in the Use function.
 mana_potion_action = ["You drank a", "restoring", " Mana"]
 food_action = ["You ate a", "restoring", " Energy"]
@@ -103,6 +103,10 @@ class item: #for regular items, usually consumables.
         items_list[self.name] = self
         if slot == "Consumables":
             consumables_list[self.name] = self
+        if slot == "Miscellaneous":
+            miscellaneous_list[self.name] = self
+        if slot == "Key Item":
+            keyitems_list[self.name] = self
         if quantity > 0:
             f.encyclopedia["Items"][self.name] = self
 
@@ -206,6 +210,9 @@ spiked_club = weapon("Both", "Spiked Club", "A crude wooden club with iron nails
 iron_dagger = weapon("Offhand", "Iron Dagger", "A simple iron dagger that's effective at targeting weak spots for critical blows", 2, 0, 125, [15, 15, 25, 5, 0, 0, 0, 0, 0, 0], 10, 10, 2, ["Slash", "Stab"], [], 6)
 flaming_sword = weapon("Mainhand", "Flaming Sword", "An enchanted iron sword that is constantly ablaze", 4, 0, 300, [20, 30, 25, 15, 0, 25, 0, 0, 0, 0], 5, 0, 1.75, ["Slash", "Stab"], [["Fire Resistance", 0.1], ["Fire Affinity", 0.1]], 3)
 
+#Ammo
+flint_arrow = weapon("Ammo", "Flint Arrow", "A crude arrow tipped with flint. Not very accurate or damaging, but it's very cheap", 1, 0, 10, [10, 15, 25, 5, 0, 0, 0, 0, 0, 0], 70, 25, 1.5, [], [], 0)
+
 #########################################
 #                ARMOR                  #
 #########################################
@@ -244,4 +251,18 @@ poison_vial = item("Consumables", "Poison Vial", "Afflicts the drinker with a mi
 eternal_poison_vial = item("Consumables", "Eternal Poison Vial", "Afflicts the drinker with a permanent minor poison", "Potion", -5, 0, 100, "Potion", 0, 0, 0, [["Lesser Poison", -1, "user"]], -1, 1)
 holy_water = item("Consumables", "Holy Water", "Cures you of nearly every ailment and restores 100 HP", "Potion", 7, 0, 300, "Health", 100, 0, 0, [["Cleanse", 0, "user"]], -1, 2)
 
+#Scrolls
 scroll_uppercut = item("Consumables", "Uppercut Scroll", "A powerful uppercut that deals 50 damage", spell_action, 3, 0, 200, "Spell", "Uppercut", 0, 0, [], -1, 1)
+
+#Miscellaneous
+stick = item("Miscellaneous", "Stick", "A somewhat straight stick that could be used for many primitive crafting recipes", "You gathered a few good sticks littered across the ground", 1, 0, 3, "", [], 3, 6, [], -1, 8)
+flint = item("Miscellaneous", "Flint", "A sharp piece of flint primarily used for crafting", "You noticed a nice chunk of flint sticking out of the ground", 1, 0, 5, "", [], 2, 4, [], -1, 7)
+feather = item("Miscellaneous", "Feather", "A small, clean feather that can be used for crafting", "You noticed an abandoned bird nest on a low hanging branch, and find a few feathers inside it", 1, 0, 2, "", [], 4, 9, [], -1, 3)
+coal = item("Miscellaneous", "Coal", "A rough chunk of coal that can be used to smelt ingots", "You found an exposed vein of coal", 2, 0, 7, "", ["Pickaxe"], 3, 5, [], -1, 6)
+iron_ore = item("Miscellaneous", "Iron Ore", "A brown lump of raw iron ore, it'll need to be smelted into an ingot to be useful for most crafting recipes", "You found an exposed vein of iron ore", 2, 0, 10, "", ["Pickaxe"], 1, 3, [], -1, 4)
+iron_ingot = item("Miscellaneous", "Iron Ingot", "A solid ingot of smelted iron, can be used in many crafting recipes", "You found an abandoned satchel left lying on the ground, and inside was an iron ingot", 2, 0, 50, "", [], 1, 1, [], -1, 0)
+garnet = item("Miscellaneous", "Garnet", "A piece of red garnet gemstone, could be sold for a decent amount of gold or used in crafting", "You found an exposed chunk of garnet", 3, 0, 75, "", ["Pickaxe"], 1, 1, [], -1, 2)
+raw_meat = item("Miscellaneous", "Raw Meat", "A piece of uncooked meat harvested fresh from a wild animal", "You find the freshly slain corpse of a deer lying unattended to out in the woods... before you have time to ask yourself if you should you quickly skin the thing and take its meat...", 1, 0, 8, "", [], 3, 5, [], -1, 1)
+
+#Key Items
+pickaxe = item("Key Item", "Pickaxe", "A basic, iron pickaxe that'll let you mine most common ores and gemstones", "", 2, 0, 100, "", 0, 0, 0, [], -1, 0)

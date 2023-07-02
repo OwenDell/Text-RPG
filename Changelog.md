@@ -1,14 +1,24 @@
 # Changelog
 
-## Update a0.2.5.1 (6/25/23)
+## Update a0.2.6 (7/2/23)
+- Added the Rest activity
+- Added the Hunt activity
+- Added the Forage activity
+- Added enemy item looting system
+- Added 10 new items
+- Added 3 new wildlife enemies that can be encountered while hunting
+- Rebalanced crit chances of most moves
 - Evasion and Received Damage Multiplier stats added to the Stats command
+- Added pickaxe and flint arrows to Andre's shop inventory
 - Fixed error when printing enemies moves stats in encyclopedia
+- Fixed error when viewing the encyclopedia entry of an enemy with the Flee move
 - Fixed bug causing equipment buffs to not work properly
 - Fixed bug causing gained XP after battle to not show accurately while XP Multiplier buff is active
 - Fixed bug causing armor damage resistances to have inverse affect on player damage resistances
-- Rebalanced crit chances of most moves
 - Fixed bug causing multiple buffs to appear in player status effects list
 - Fixed bug causing Gauntlets Of Strength to be unobtainable
+- Fixed bug allowing the player to buy or sell negative quantities of items
+- Fixed bug causing some travel events to make the player gain/lose gold unexpectedly
 
 ## Update a0.2.5 (6/23/23)
 - Changed the way status effects work on the back-end to be more modular; no difference to gameplay

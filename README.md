@@ -14,9 +14,10 @@ This is a new attempt at the same formula I did ~2 years ago in C#, being a cycl
 - An XP and level up system that allows the player to improve various stats
 - Armor that can provide benefits and drawbacks as well as special buffs
 - A dynamic encyclopedia that automatically fills in with information on the world as you progress and find new things
+- An activities system that allows the player to perform various activities while venturing out in the wilds
 
 ## Planned Features:
-- An activities system that allows the player to perform various activities while venturing out in the wilds
+- A Save and Load system
 - A new type of area called 'Dungeons' where the player will progress deeper into them before encountering a boss
 - A progressive dialogue and relations system with numerous NPC's that will affect how they treat you and what opportunities they offer
 - A quest system where various NPC's will offer tasks and quests to the player

@@ -216,6 +216,7 @@ def hpcheck(target, checkup=False): #checks the hp of both the player and the ta
         player.gold += gold_gain
         player.XP += (target.XP*p.xp_gain_multiplier)
         print(f"You gained {gold_gain} gold and {target.XP*p.xp_gain_multiplier} XP!", 1)
+        target.loot_enemy()
         player.cures_list["Victory"] = True
         return True
     if checkup == True:
@@ -315,13 +316,15 @@ class m_Flee: #Attempts to flee from combat, odds of success is 50% chance + the
     def __str__(self):
         return f"{self.name}: You attempt to flee combat."
         
-    def __call__(self, player, target):
+    def __call__(self, user, target):
         global battling
-        if random.randint(0, 100) <= 50+(player.evasion-target.evasion):
+        user_print = "You" if user is player else "the " + user.name
+        target_print = "You" if target is player else "the " + target.name
+        if random.randint(0, 100) <= 50+(user.evasion-target.evasion):
             battling = False
-            print(f"You successfully fled combat from the enemy {target.name}!", 2)
+            print(f"{user_print} fled from {target_print} in combat!", 2)
         else:
-            print(f"You tried to escape the enemy {target.name}, but they caught you!", 2)
+            print(f"{user_print} tried to escape from {target_print}, but it failed!", 2)
            
 class m_Use: #use a consumable item, which can be something simple that affects mana, energy, or health, or something more complex that applies a status effect.
     def __init__(self):
@@ -452,7 +455,7 @@ punch = Attack(True, "Punch", "A quick punch with your fist", 10, 3, "Blunt", 11
 slash = Attack(False, "Slash", "A sharp slash with your weapon", 20, 3, "Slash", 100, 8, 0, 0, "slashed", "")
 stab = Attack(False, "Stab", "A piercing jab with your weapon", 25, 5, "Pierce", 85, 12, 0, 0, "stabbed", "")
 bash = Attack(False, "Bash", "A crushing bash with your weapon", 15, 3, "Blunt", 95, 5, 0, 0, "bashed", "")
-uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 20, "Blunt", 80, 20, 15, 0, "delivered a devastating uppercut to", "Uppercut")
+uppercut = Attack(False, "Uppercut", "A powerful uppercut", 50, 20, "Blunt", 80, 20, 10, 0, "delivered a devastating uppercut to", "Uppercut")
 execute = Attack(False, "Execute", "You delete the enemy from existence", -1, 999999, "Physical", -1, 0, 0, 0, "executed", "Execute")
 claw = Attack(False, "Claw", "A painful slash with your claws", 10, 10, "Slash", 90, 10, 0, 0, "clawed", "")
 bite = Attack(False, "Bite", "A deadly bite with your fangs", 20, 15, "Pierce", 85, 7, 0, 0, "bit", "")
